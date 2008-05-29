@@ -1,1 +1,0 @@
-This folder contains examples copied from http://www.codeproject.com/KB/architecture/NHibernateBestPractices.aspx to demonstrate application of NHContrib.
