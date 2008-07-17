@@ -1,0 +1,187 @@
+<Configuration>
+  <UnitTestRunner>
+    <CustomStartDirectory>
+    </CustomStartDirectory>
+    <UseShadowCopy>True</UseShadowCopy>
+    <UseCustomFolder>False</UseCustomFolder>
+    <EnableUnitTesting>True</EnableUnitTesting>
+    <Providers />
+  </UnitTestRunner>
+  <RecentFiles>
+    <RecentFiles>
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:DynamicQueryTests.cs" caret="399" scrollPosition="0|8" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:EntityExpressionVisitor.cs" caret="1242" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:DBFunctionMethodTranslator.cs" caret="189" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:StringMethodTranslator.cs" caret="528" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/f:NHibernateExtensions.cs" caret="868" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Expressions/f:EntityExpression.cs" caret="1230" scrollPosition="0|7" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:AssociationVisitor.cs" caret="4623" scrollPosition="0|95" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:BinaryCriterionVisitor.cs" caret="2910" scrollPosition="0|65" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/f:CriteriaResultReader.cs" caret="543" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:CollectionMethodTranslator.cs" caret="935" scrollPosition="0|24" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/d:Entities/f:TimeSheet.hbm.xml" caret="795" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:ListMethodTranslator.cs" caret="1990" scrollPosition="0|29" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:WhereArgumentsVisitor.cs" caret="6526" scrollPosition="0|180" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:EnumerableExtensions.cs" caret="302" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:EnumerableMethodTranslator.cs" caret="5656" scrollPosition="0|97" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:RegresstionTests.cs" caret="402" scrollPosition="0|0" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:BaseTest.cs" caret="1212" scrollPosition="0|21" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:WhereTests.cs" caret="572" scrollPosition="0|13" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/f:Query.cs" caret="1508" scrollPosition="0|34" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/f:QueryProvider.cs" caret="1088" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/f:NHibernateQueryProvider.cs" caret="1332" scrollPosition="0|12" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:MethodTranslatorRegistry.cs" caret="1933" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:NHibernateExpressionVisitor.cs" caret="554" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="2805" scrollPosition="0|23" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:SelectArgumentsVisitor.cs" caret="2817" scrollPosition="0|66" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:ImmediateResultsVisitor.cs" caret="5630" scrollPosition="0|137" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="353" scrollPosition="0|0" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:LinqQuerySamples.cs" caret="11377" scrollPosition="0|412" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:NHibernateQueryTranslator.cs" caret="1944" scrollPosition="0|42" />
+    </RecentFiles>
+    <RecentEdits>
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:ListMethodTranslator.cs" caret="1735" scrollPosition="0|32" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:ListMethodTranslator.cs" caret="1461" scrollPosition="0|32" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:ListMethodTranslator.cs" caret="1989" scrollPosition="0|32" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:EnumerableMethodTranslator.cs" caret="3427" scrollPosition="0|85" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:EnumerableMethodTranslator.cs" caret="5256" scrollPosition="0|97" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:EnumerableMethodTranslator.cs" caret="5487" scrollPosition="0|97" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/d:MethodTranslators/f:EnumerableMethodTranslator.cs" caret="5656" scrollPosition="0|97" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:LinqQuerySamples.cs" caret="18076" scrollPosition="0|644" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:RegresstionTests.cs" caret="402" scrollPosition="0|7" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="682" scrollPosition="0|29" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:BaseTest.cs" caret="1212" scrollPosition="0|21" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="673" scrollPosition="0|7" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="682" scrollPosition="0|41" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="682" scrollPosition="0|41" />
+      <File id="B09778CE-44FD-4BE2-AB1E-9AFDFACB8279/f:LinqQuerySamples.cs" caret="11150" scrollPosition="0|402" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="689" scrollPosition="0|119" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="682" scrollPosition="0|84" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="682" scrollPosition="0|84" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="677" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:QueryableMethodTranslator.cs" caret="353" scrollPosition="0|0" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="1477" scrollPosition="0|41" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="3264" scrollPosition="0|118" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="3366" scrollPosition="0|118" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="3051" scrollPosition="0|106" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="3158" scrollPosition="0|106" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="2975" scrollPosition="0|106" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="2887" scrollPosition="0|106" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Util/f:DetachedCriteriaAdapter.cs" caret="2805" scrollPosition="0|91" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:NHibernateQueryTranslator.cs" caret="697" scrollPosition="0|22" />
+      <File id="2CF9A83A-BC40-4485-A763-BFF59B2EBDAD/d:Visitors/f:NHibernateQueryTranslator.cs" caret="1501" scrollPosition="0|22" />
+    </RecentEdits>
+  </RecentFiles>
+  <SettingsComponent>
+    <string />
+    <integer />
+    <boolean>
+      <setting name="SolutionAnalysisEnabled">False</setting>
+      <setting name="UseSolutionBuilder">False</setting>
+    </boolean>
+  </SettingsComponent>
+  <NAntValidationSettings>
+    <NAntPath value="" />
+  </NAntValidationSettings>
+  <CompletionStatisticsManager>
+    <ItemStatistics item="Default">
+      <Item value="LessOrEqual" priority="0" />
+      <Item value="criteria" priority="7" />
+      <Item value="SubQuery" priority="3" />
+      <Item value="ConditionalProjection" priority="0" />
+      <Item value="Conditional" priority="5" />
+      <Item value="Constant" priority="10" />
+      <Item value="GetAverageProjection" priority="0" />
+      <Item value="GetMaxProjection" priority="0" />
+      <Item value="GetMinProjection" priority="0" />
+      <Item value="GetSumProjection" priority="0" />
+      <Item value="GetAnyProjection" priority="0" />
+      <Item value="Method" priority="4" />
+      <Item value="Name" priority="3" />
+      <Item value="NodeType" priority="0" />
+      <Item value="ToString" priority="1" />
+      <Item value="VisitCriterionExpression" priority="0" />
+      <Item value="Linq" priority="0" />
+      <Item value="Where" priority="0" />
+      <Item value="Submitted" priority="0" />
+      <Item value="DateTime" priority="0" />
+      <Item value="Now" priority="0" />
+      <Item value="ToList" priority="0" />
+      <Item value="Arguments" priority="10" />
+      <Item value="CollectionAccessExpression" priority="0" />
+      <Item value="Avg" priority="1" />
+      <Item value="expression" priority="1" />
+      <Item value="NotImplementedException" priority="5" />
+      <Item value="GetAssociatedDetachedCriteria" priority="1" />
+      <Item value="detachedCriteria" priority="3" />
+      <Item value="SetProjection" priority="6" />
+      <Item value="NHibernate" priority="1" />
+      <Item value="Transform" priority="0" />
+      <Item value="session" priority="6" />
+      <Item value="Count" priority="7" />
+      <Item value="Id" priority="3" />
+      <Item value="As" priority="1" />
+      <Item value="ProjectionList" priority="1" />
+      <Item value="rootCriteria" priority="8" />
+      <Item value="QueryableMethodTranslator" priority="1" />
+      <Item value="Projections" priority="1" />
+      <Item value="LeProperty" priority="0" />
+      <Item value="Le" priority="0" />
+      <Item value="GeProperty" priority="0" />
+      <Item value="ElementType" priority="0" />
+      <Item value="KeyType" priority="0" />
+      <Item value="NHibernateType" priority="0" />
+      <Item value="detached" priority="4" />
+      <Item value="CreateCriteria" priority="0" />
+      <Item value="EqProperty" priority="0" />
+      <Item value="Add" priority="2" />
+      <Item value="In" priority="0" />
+      <Item value="Subqueries" priority="0" />
+      <Item value="DetachedCriteria" priority="3" />
+      <Item value="For" priority="2" />
+      <Item value="GetRootEntityTypeIfAvailable" priority="2" />
+      <Item value="IProjection" priority="0" />
+      <Item value="objVisitor" priority="0" />
+      <Item value="Projection" priority="3" />
+      <Item value="p0Visitor" priority="0" />
+      <Item value="projections" priority="0" />
+      <Item value="p1Visitor" priority="0" />
+      <Item value="WriteLine" priority="0" />
+      <Item value="NHibernateUtil" priority="4" />
+      <Item value="GuessType" priority="1" />
+      <Item value="ReturnType" priority="0" />
+      <Item value="Int32" priority="1" />
+      <Item value="String" priority="1" />
+      <Item value="GetContainsProjection" priority="0" />
+      <Item value="RootEntity" priority="0" />
+      <Item value="Object" priority="3" />
+      <Item value="AbandonedMutexException" priority="0" />
+      <Item value="CollectionMethodTranslator" priority="0" />
+      <Item value="ConstantExpression" priority="2" />
+      <Item value="InvalidOperationException" priority="0" />
+      <Item value="Collections" priority="0" />
+      <Item value="ICollection" priority="0" />
+      <Item value="Left" priority="0" />
+      <Item value="GetContainsProjectionWithEntitySource" priority="0" />
+      <Item value="FirstEntity" priority="0" />
+      <Item value="SelectArgumentsVisitor" priority="0" />
+      <Item value="Visit" priority="1" />
+      <Item value="Adapt" priority="1" />
+      <Item value="GetProjectionInternal" priority="0" />
+      <Item value="SessionFactory" priority="1" />
+      <Item value="GetClassMetadata" priority="1" />
+      <Item value="nhibernateType" priority="0" />
+      <Item value="Type" priority="0" />
+      <Item value="IdentifierPropertyName" priority="0" />
+      <Item value="WhereArgumentsVisitor" priority="0" />
+      <Item value="whereVisitor" priority="0" />
+      <Item value="GetCriterion" priority="0" />
+      <Item value="Alias" priority="0" />
+      <Item value="_detachedCriteria" priority="1" />
+      <Item value="GetExecutableCriteria" priority="2" />
+      <Item value="Session" priority="1" />
+      <Item value="List" priority="2" />
+      <Item value="_session" priority="0" />
+    </ItemStatistics>
+  </CompletionStatisticsManager>
+</Configuration>
