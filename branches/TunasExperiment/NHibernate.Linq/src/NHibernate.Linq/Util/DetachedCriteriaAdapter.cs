@@ -63,7 +63,7 @@ namespace NHibernate.Linq.Util
 			get { return _detachedCriteria.Alias; }
 		}
 
-		public void ClearOrderds()
+		public void ClearOrders()
 		{
 			throw new NotSupportedException();
 		}

@@ -56,7 +56,6 @@
     <Compile Include="Expressions\NHibernateExpression.cs" />
     <Compile Include="Expressions\QuerySourceExpression.cs" />
     <Compile Include="INHibernateQueryable.cs" />
-    <Compile Include="NhibernateImprovements\UnnamedSqlFunctionProjection.cs" />
     <Compile Include="QueryOptions.cs" />
     <Compile Include="Transform\TypeSafeConstructorMemberInitResultTransformer.cs" />
     <Compile Include="Util\EnumerableExtensions.cs" />
@@ -87,7 +86,7 @@
     <Compile Include="Query.cs" />
     <Compile Include="QueryProvider.cs" />
     <Compile Include="Visitors\PropertyToMethodVisitor.cs" />
-    <Compile Include="Visitors\QueryableMethodTranslator.cs" />
+    <Compile Include="Visitors\MethodTranslators\QueryableMethodTranslator.cs" />
     <Compile Include="Visitors\SelectManyVisitor.cs" />
     <Compile Include="Transform\LinqJoinResultsTransformer.cs" />
     <Compile Include="Util\DetachedCriteriaAdapter.cs" />
