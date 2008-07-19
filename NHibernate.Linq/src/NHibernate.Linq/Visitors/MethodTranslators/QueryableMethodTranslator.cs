@@ -8,7 +8,7 @@ using NHibernate.Linq.Exceptions;
 using NHibernate.Linq.Expressions;
 using NHibernate.Linq.Util;
 
-namespace NHibernate.Linq.Visitors
+namespace NHibernate.Linq.Visitors.MethodTranslators
 {
 	public class QueryableMethodTranslator:IMethodTranslator
 	{
