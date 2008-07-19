@@ -96,9 +96,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			if (expression.Arguments.Count > 1)//Means we have lambda
 			{
 				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new MemberNameVisitor(this.criteria);
+				var visitor = new SelectArgumentsVisitor(this.criteria, this.session);
 				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Avg(visitor.MemberName));
+				detached.SetProjection(Projections.Avg(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
@@ -108,13 +108,13 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
 			string alias = collection.ElementExpression.Alias;
-			detached.CreateCriteria(collection.Name, alias);
+			var collectionCriteria= detached.CreateCriteria(collection.Name, alias);
 			if(expression.Arguments.Count>1)//Means we have lambda
 			{
 				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new MemberNameVisitor(this.criteria);
+				var visitor = new SelectArgumentsVisitor(detached.Adapt(this.session), this.session);
 				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Max(visitor.MemberName));
+				detached.SetProjection(Projections.Max(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
@@ -128,9 +128,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			if (expression.Arguments.Count > 1)//Means we have lambda
 			{
 				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new MemberNameVisitor(this.criteria);
+				var visitor = new SelectArgumentsVisitor(this.criteria, this.session);
 				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Min(visitor.MemberName));
+				detached.SetProjection(Projections.Min(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
@@ -144,9 +144,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			if (expression.Arguments.Count > 1)//Means we have lambda
 			{
 				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new MemberNameVisitor(this.criteria);
+				var visitor = new SelectArgumentsVisitor(this.criteria,this.session);
 				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Sum(visitor.MemberName));
+				detached.SetProjection(Projections.Sum(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
