@@ -68,13 +68,12 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore("TODO")]
 		public void AggregateWithMonthFunction()
 		{
 			var date = new DateTime(2007, 1, 1);
 
 			var query = (from e in db.Employees
-			             where db.Methods.Month(e.BirthDate) == date.Month
+			             where e.BirthDate.Month() == date.Month
 			             select e.FirstName)
 				.Aggregate(new StringBuilder(), ( sb, name ) => sb.Length > 0 ? sb.Append(", ").Append(name) : sb.Append(name));
 
@@ -83,14 +82,13 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore("TODO")]
 		public void AggregateWithBeforeYearFunction()
 		{
 			var date = new DateTime(1960, 1, 1);
 
 			var query = (from e in db.Employees
-			             where db.Methods.Year(e.BirthDate) < date.Year
-			             select db.Methods.Upper(e.FirstName))
+			             where e.BirthDate.Year() < date.Year
+			             select e.FirstName.Upper())
 				.Aggregate(new StringBuilder(), ( sb, name ) => sb.Length > 0 ? sb.Append(", ").Append(name) : sb.Append(name));
 
 			Console.WriteLine("Birthdays before {0}:", date.ToString("yyyy"));
@@ -98,13 +96,12 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore("TODO")]
 		public void AggregateWithOnOrAfterYearFunction()
 		{
 			var date = new DateTime(1960, 1, 1);
 
 			var query = (from e in db.Employees
-			             where db.Methods.Year(e.BirthDate) >= date.Year && db.Methods.Len(e.FirstName) > 4
+			             where e.BirthDate.Year() >= date.Year && e.FirstName.Len() > 4
 			             select e.FirstName)
 				.Aggregate(new StringBuilder(), ( sb, name ) => sb.Length > 0 ? sb.Append(", ").Append(name) : sb.Append(name));
 
@@ -113,14 +110,13 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore("TODO")]
 		public void AggregateWithUpperAndLowerFunctions()
 		{
 			var date = new DateTime(2007, 1, 1);
 
 			var query = (from e in db.Employees
-			             where db.Methods.Month(e.BirthDate) == date.Month
-			             select new {First = e.FirstName.ToUpper(), Last = db.Methods.Lower(e.LastName)})
+			             where e.BirthDate.Month() == date.Month
+			             select new {First = e.FirstName.ToUpper(), Last = e.LastName.Lower()})
 				.Aggregate(new StringBuilder(), ( sb, name ) => sb.Length > 0 ? sb.Append(", ").Append(name) : sb.Append(name));
 
 			Console.WriteLine("{0} Birthdays:", date.ToString("MMMM"));
@@ -128,14 +124,13 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore("TODO")]
 		public void AggregateWithCustomFunction()
 		{
 			var date = new DateTime(1960, 1, 1);
 
 			var query = (from e in db.Employees
-			             where db.Methods.Year(e.BirthDate) < date.Year
-			             select db.Methods.fnEncrypt(e.FirstName))
+			             where e.BirthDate.Year() < date.Year
+			             select e.FirstName.fnEncrypt())
 				.Aggregate(new StringBuilder(), ( sb, name ) => sb.AppendLine(BitConverter.ToString(name)));
 
 			Console.WriteLine(query);

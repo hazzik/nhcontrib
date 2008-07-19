@@ -13,11 +13,11 @@ namespace NHibernate.Linq.Tests
 		/// END
 		/// GO
 		/// </summary>
-		/// <param name="methods"></param>
+
 		/// <param name="value"></param>
 		/// <returns></returns>
 		[SqlFunction("dbo")]
-		public static byte[] fnEncrypt(this IDbMethods methods, string value)
+		public static byte[] fnEncrypt(this string value)
 		{
 			return null;
 		}

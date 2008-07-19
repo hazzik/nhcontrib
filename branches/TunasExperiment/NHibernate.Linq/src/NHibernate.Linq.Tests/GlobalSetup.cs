@@ -17,10 +17,10 @@ public class GlobalSetup
 	public void SetupNHibernate()
 	{
 		Configuration cfg = new Configuration().Configure();
-		//new SchemaExport(cfg).Execute(false, true, false, true);
+		new SchemaExport(cfg).Execute(false, true, false, true);
 		factory = cfg.BuildSessionFactory();
 
-		//CreateTestData();
+		CreateTestData();
 	}
 
 	[TearDown]

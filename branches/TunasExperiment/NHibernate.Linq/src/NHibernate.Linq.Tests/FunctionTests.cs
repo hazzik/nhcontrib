@@ -13,8 +13,8 @@ namespace NHibernate.Linq.Tests
 		public void LeftFunction()
 		{
 			var query = from e in db.Employees
-						where db.Methods.left(e.FirstName, 2) == "An"
-						select db.Methods.left(e.FirstName, 3);
+						where e.FirstName.Left( 2) == "An"
+						select e.FirstName.Left(3);
 			var results = query.ToList();
 			foreach (var r in results)
 			{
@@ -27,7 +27,7 @@ namespace NHibernate.Linq.Tests
 		public void SubstringFunction()
 		{
 			var query = from e in db.Employees
-						where db.Methods.Substring(e.FirstName, 1, 2) == "An"
+						where SqlClientExtensions.Substring(e.FirstName,1, 2) == "An"
 						select e;
 			var results = query.ToList();
 			foreach (var r in results)
@@ -46,7 +46,7 @@ namespace NHibernate.Linq.Tests
 			                   	{
 			                   		Before = e.FirstName,
 			                   		AfterMethod = e.FirstName.Replace("An", "Zan"),
-			                   		AfterExtension = db.Methods.Replace(e.FirstName, "An", "Zan")
+			                   		AfterExtension = e.FirstName.Replace("An", "Zan")
 			                   	};
 			var results = query.ToList();
 			foreach (var r in results)
@@ -61,7 +61,7 @@ namespace NHibernate.Linq.Tests
 		public void CharIndexFunction()
 		{
 			var query = from e in db.Employees
-			            where db.Methods.CharIndex(e.FirstName, 'A') == 1
+			            where e.FirstName.CharIndex('A') == 1
 			            select e.FirstName;
 
 			ObjectDumper.Write(query);
@@ -91,7 +91,7 @@ namespace NHibernate.Linq.Tests
 		public void TwoFunctionExpression()
 		{
 			var query = from e in db.Employees
-			            where db.Methods.left(e.FirstName, 1) == db.Methods.left(e.LastName, 1)
+			            where e.FirstName.Left(1) == e.LastName.Left(1)
 			            select new {Name = e.FirstName, LastName = e.LastName};
 
 			var results = query.ToList();
