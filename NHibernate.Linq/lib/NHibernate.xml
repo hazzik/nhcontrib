@@ -9276,11 +9276,25 @@
             <param name="propertyName"></param>
             <returns></returns>
         </member>
+        <member name="M:NHibernate.Criterion.Projections.Max(NHibernate.Criterion.IProjection)">
+            <summary>
+            A projection maximum value
+            </summary>
+            <param name="projection"></param>
+            <returns></returns>
+        </member>
         <member name="M:NHibernate.Criterion.Projections.Min(System.String)">
             <summary>
             A property minimum value
             </summary>
             <param name="propertyName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NHibernate.Criterion.Projections.Min(NHibernate.Criterion.IProjection)">
+            <summary>
+            A projection minimum value
+            </summary>
+            <param name="projection"></param>
             <returns></returns>
         </member>
         <member name="M:NHibernate.Criterion.Projections.Avg(System.String)">
@@ -9290,11 +9304,25 @@
             <param name="propertyName"></param>
             <returns></returns>
         </member>
+        <member name="M:NHibernate.Criterion.Projections.Avg(NHibernate.Criterion.IProjection)">
+            <summary>
+            A projection average value
+            </summary>
+            <param name="projection"></param>
+            <returns></returns>
+        </member>
         <member name="M:NHibernate.Criterion.Projections.Sum(System.String)">
             <summary>
             A property value sum
             </summary>
             <param name="propertyName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NHibernate.Criterion.Projections.Sum(NHibernate.Criterion.IProjection)">
+            <summary>
+            A projection value sum
+            </summary>
+            <param name="projection"></param>
             <returns></returns>
         </member>
         <member name="M:NHibernate.Criterion.Projections.SqlProjection(System.String,System.String[],NHibernate.Type.IType[])">

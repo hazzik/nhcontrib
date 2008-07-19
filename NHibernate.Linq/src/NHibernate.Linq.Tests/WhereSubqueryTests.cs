@@ -114,6 +114,25 @@ namespace NHibernate.Linq.Tests
             Assert.AreEqual(0, query.Count);
         }
 
+		[Test]
+		public void TimeSheetsWithMaxWithProjectionSubquery()
+		{
+			var query = (from timesheet in session.Linq<Timesheet>()
+						 where timesheet.Entries.Max(e => e.NumberOfHours*e.Id) >100
+						 select timesheet).ToList();
+
+			Assert.AreEqual(1, query.Count);
+		}
+		[Test]
+		public void TimeSheetsWithMinWithProjectionSubquery()
+		{
+			var query = (from timesheet in session.Linq<Timesheet>()
+						 where timesheet.Entries.Min(e => e.NumberOfHours * e.Id)==12
+						 select timesheet).ToList();
+
+			Assert.AreEqual(1, query.Count);
+		}
+
         [Test]
         public void TimeSheetsWithMaxSubquery()
         {

@@ -205,8 +205,7 @@ namespace NHibernate.Linq.Visitors
 			var joinedProjections = new List<IProjection>();
 			joinedProjections.AddRange(leftVisitor._projections);
 			joinedProjections.AddRange(rightVisitor._projections);
-			var types = joinedProjections[0].GetTypes(_rootCriteria, CriteriaQuery);
-			var projection = new SqlFunctionProjection(arithmaticOperation, types[0], joinedProjections.ToArray());
+			var projection = new SqlFunctionProjection(arithmaticOperation,NHibernateUtil.GuessType(expr.Left.Type), joinedProjections.ToArray());
 			_projections.Add(projection);
         }
 

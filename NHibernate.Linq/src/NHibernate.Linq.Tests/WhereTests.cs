@@ -40,6 +40,7 @@ namespace NHibernate.Linq.Tests
 			             where user.Name == "ayende"
 			             select user).First();
 			Assert.AreEqual("ayende", query.Name);
+			
 		}
 
 		[Test]
