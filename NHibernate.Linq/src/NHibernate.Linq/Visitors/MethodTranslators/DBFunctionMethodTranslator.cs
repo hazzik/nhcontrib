@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using NHibernate.Criterion;
 using NHibernate.Dialect.Function;
+using NHibernate.Linq.Expressions;
 
 namespace NHibernate.Linq.Visitors.MethodTranslators
 {
@@ -20,19 +21,30 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 		private ISession session;
 		private ICriteria rootCriteria;
-
+		//TODO: Use property position
 		public IProjection GetProjection(MethodCallExpression expression)
 		{
-			var sqlfunction = new StandardSQLFunction(expression.Method.Name);
+			var attributes = expression.Method.GetCustomAttributes(typeof (SqlFunctionAttribute),true);
+			int propertyPosition = 0;
+			string functionName;
+			if (attributes != null && attributes.Length > 0)
+			{
+				var attribute = attributes[0] as SqlFunctionAttribute;
+				propertyPosition = attribute.PropertyPosition;
+				functionName = string.Format("{0}.{1}", attribute.Owner, expression.Method.Name);
+			}
+			else
+				functionName = expression.Method.Name;
 
-			var projections = new IProjection[expression.Arguments.Count-1];
-			var criteria = DetachedCriteria.For(this.rootCriteria.GetRootEntityTypeIfAvailable());
-			for (int i = 1; i < expression.Arguments.Count; i++)
+			var sqlfunction = new StandardSQLFunction(functionName);
+
+			var projections = new IProjection[expression.Arguments.Count];
+			for (int i = 0; i < expression.Arguments.Count; i++)
 			{
 
 				var visitor = new SelectArgumentsVisitor(rootCriteria, this.session);
 				visitor.Visit(expression.Arguments[i]);
-				projections[i - 1] = visitor.Projection;
+				projections[i] = visitor.Projection;
 			}
 			var returnType = NHibernateUtil.GuessType(expression.Method.ReturnType);
 			return Projections.SqlFunction(sqlfunction, returnType , projections);
