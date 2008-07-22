@@ -161,22 +161,9 @@ namespace NHibernate.Linq.Visitors
 			var rightVisitor = new SelectArgumentsVisitor(_rootCriteria, _session);
 			leftVisitor.Visit(expr.Left);
 			rightVisitor.Visit(expr.Right);
-
-			var joinedProjections = new List<IProjection>();
-			joinedProjections.AddRange(leftVisitor._projections);
-			joinedProjections.AddRange(rightVisitor._projections);
-
-			IType[] types = joinedProjections[0].GetTypes(_rootCriteria, CriteriaQuery);
-			var useConcat = types[0] is AbstractStringType;
-			SqlFunctionProjection projection;
-			if (useConcat)
-			{
-				projection = new SqlFunctionProjection("concat", types[0], joinedProjections.ToArray());
-			}
-			else
-			{
-				projection = new SqlFunctionProjection(arithmaticAddition, types[0], joinedProjections.ToArray());
-			}
+			var projection = new SqlFunctionProjection(arithmaticAddition, 
+				NHibernateUtil.GuessType(expr.Left.Type),
+				leftVisitor.Projection,rightVisitor.Projection);
 			_projections.Add(projection);
 		}
 
@@ -255,7 +242,6 @@ namespace NHibernate.Linq.Visitors
             {
                 _transformer = new LinqJoinResultsTransformer(expr.Type);
             }
-
             return expr;
         }
 

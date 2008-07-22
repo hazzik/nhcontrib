@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using NHibernate.Linq.Exceptions;
+using NHibernate.Linq.SqlClient;
+using NHibernate.Linq.Visitors.MethodTranslators;
 
 namespace NHibernate.Linq.Visitors
 {
@@ -13,6 +15,7 @@ namespace NHibernate.Linq.Visitors
 		static MethodTranslatorRegistry()
 		{
 			current = new MethodTranslatorRegistry();
+			RegisterBasicTranslators(current);
 		}
 		public static MethodTranslatorRegistry Current
 		{
@@ -75,6 +78,22 @@ namespace NHibernate.Linq.Visitors
 			}
 			else
 				throw new NHibernate.Linq.Exceptions.MethodTranslatorNotRegistered(typeInfo);
+		}
+		private static void RegisterBasicTranslators(MethodTranslatorRegistry registry)
+		{
+			registry.RegisterTranslator<string, StringMethodTranslator>();
+			registry.RegisterTranslator(typeof(System.Linq.Enumerable),
+																typeof(EnumerableMethodTranslator));
+			registry.RegisterTranslator(typeof(System.Linq.Queryable),
+																typeof(QueryableMethodTranslator));
+			registry.RegisterTranslator(typeof(List<>),
+																typeof(ListMethodTranslator));
+			registry.RegisterTranslator(typeof(SqlClientExtensions),
+																	typeof(DBFunctionMethodTranslator));
+			registry.RegisterTranslator(typeof(Queryable),
+														typeof(QueryableMethodTranslator));
+			registry.RegisterTranslator(typeof(ICollection<>),
+											typeof(CollectionMethodTranslator));
 		}
 		#endregion
 	}

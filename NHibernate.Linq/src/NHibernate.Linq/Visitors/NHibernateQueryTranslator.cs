@@ -137,18 +137,18 @@ namespace NHibernate.Linq.Visitors
 
         private void HandleOrderByCall(MethodCallExpression call)
         {
-            LinqExpression expr = ((UnaryExpression)call.Arguments[1]).Operand;
-
-            string name = MemberNameVisitor.GetMemberName(rootCriteria, expr);
-            rootCriteria.AddOrder(Order.Asc(name));
+        	LinqExpression expr = ((UnaryExpression) call.Arguments[1]).Operand;
+        	var visitor = new SelectArgumentsVisitor(this.rootCriteria, this.session);
+			visitor.Visit(expr);
+            rootCriteria.AddOrder(Order.Asc(visitor.Projection));
         }
 
         private void HandleOrderByDescendingCall(MethodCallExpression call)
         {
-            LinqExpression expr = ((UnaryExpression)call.Arguments[1]).Operand;
-
-            string name = MemberNameVisitor.GetMemberName(rootCriteria, expr);
-            rootCriteria.AddOrder(Order.Desc(name));
+			LinqExpression expr = ((UnaryExpression)call.Arguments[1]).Operand;
+			var visitor = new SelectArgumentsVisitor(this.rootCriteria, this.session);
+			visitor.Visit(expr);
+			rootCriteria.AddOrder(Order.Desc(visitor.Projection));
         }
 
         private void HandleTakeCall(MethodCallExpression call)

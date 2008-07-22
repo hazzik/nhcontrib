@@ -37,23 +37,20 @@ namespace NHibernate.Linq.Tests
 		}
 
 		[Test]
-		[Ignore]
 		public void AggregateAscendingOrderByClause()
 		{
 			var query = from c in nwnd.Customers
-						orderby c.Orders.Count
+						orderby c.Orders.Count()
 						select c;
 
 			var customers = query.ToList();
-
-			for (int i = 0; i < customers.Count; i++)
+			for (int i = 0; i < customers.Count-1; i++)
 			{
-				Assert.LessOrEqual(customers[i].Orders.Count, customers[i].Orders.Count);
+				Assert.LessOrEqual(customers[i].Orders.Count, customers[i+1].Orders.Count);
 			}
 		}
 
 		[Test]
-		[Ignore]
 		public void AggregateDescendingOrderByClause()
 		{
 			var query = from c in nwnd.Customers
@@ -62,9 +59,9 @@ namespace NHibernate.Linq.Tests
 
 			var customers = query.ToList();
 
-			for (int i = 0; i < customers.Count;i++ )
+			for (int i = 0; i < customers.Count-1;i++ )
 			{
-				Assert.GreaterOrEqual(customers[i].Orders.Count, customers[i].Orders.Count);
+				Assert.GreaterOrEqual(customers[i].Orders.Count, customers[i+1].Orders.Count);
 			}
 		}
 
