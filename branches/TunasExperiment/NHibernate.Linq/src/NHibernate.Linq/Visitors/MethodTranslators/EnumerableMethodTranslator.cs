@@ -88,21 +88,21 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		}
 		protected virtual IProjection GetAverageProjection(MethodCallExpression expression)
 		{
+			if (!(expression.Arguments.Count>1) )
+				throw new InvalidOperationException();
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
 			string alias = collection.ElementExpression.Alias;
-			detached.CreateCriteria(collection.Name, alias);
+			var collectionCriteria = detached.CreateCriteria(collection.Name, alias);
 
-			if (expression.Arguments.Count > 1)//Means we have lambda
-			{
-				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new SelectArgumentsVisitor(this.criteria, this.session);
-				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Avg(visitor.Projection));
-			}
+			var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
+			var visitor = new SelectArgumentsVisitor(collectionCriteria.Adapt(this.session), this.session);
+			visitor.Visit(lambda);
+			detached.SetProjection(Projections.Avg(visitor.Projection));
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
 		}
+
 		protected virtual IProjection GetMaxProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
@@ -137,20 +137,21 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		}
 		protected virtual IProjection GetSumProjection(MethodCallExpression expression)
 		{
+			if (!(expression.Arguments.Count > 1))
+				throw new InvalidOperationException();
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
 			string alias = collection.ElementExpression.Alias;
 			detached.CreateCriteria(collection.Name, alias);
-			if (expression.Arguments.Count > 1)//Means we have lambda
-			{
-				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
-				var visitor = new SelectArgumentsVisitor(this.criteria,this.session);
-				visitor.Visit(lambda);
-				detached.SetProjection(Projections.Sum(visitor.Projection));
-			}
+			var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
+			var visitor = new SelectArgumentsVisitor(this.criteria, this.session);
+			visitor.Visit(lambda);
+			detached.SetProjection(Projections.Sum(visitor.Projection));
+
 			var subQueryProjection = Projections.SubQuery(detached);
 			return subQueryProjection;
 		}
+
 		protected virtual IProjection GetCountProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
@@ -159,14 +160,15 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			var criteria = detached.CreateCriteria(collection.Name, alias);
 			if(expression.Arguments.Count>1)//Means we have lambda, horay!
 			{
+				var lambda = LinqUtil.StripQuotes(expression.Arguments[1]) as LambdaExpression;
 				var expr = expression.Arguments[1] as LambdaExpression;
 				var temp = new WhereArgumentsVisitor(criteria.Adapt(session), session);
 				temp.Visit(expr.Body);
 				temp.CurrentCriterions.Each(x => criteria.Add(x));
 			}
-			EntityExpression rootEntity = EntityExpressionVisitor.RootEntity(expression);
-			string identifierName = rootEntity.MetaData.IdentifierPropertyName;
-			detached.SetProjection(Projections.Count(string.Format("{0}.{1}",alias, rootEntity.MetaData.IdentifierPropertyName)));
+			var type = collection.ElementExpression.Type;
+			string identifierName = this.session.SessionFactory.GetClassMetadata(type).IdentifierPropertyName;
+			detached.SetProjection(Projections.Count(string.Format("{0}.{1}", alias, identifierName)));
 			return Projections.SubQuery(detached);
 		}
 		protected virtual IProjection GetContainsProjection(MethodCallExpression expression)

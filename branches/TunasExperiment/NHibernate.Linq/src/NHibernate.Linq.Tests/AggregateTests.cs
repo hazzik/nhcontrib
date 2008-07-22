@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text;
+using NHibernate.Linq.Visitors;
+using NHibernate.Linq.Visitors.MethodTranslators;
 using NUnit.Framework;
 using NHibernate.Linq.SqlClient;
 using System.Linq;
@@ -126,6 +128,7 @@ namespace NHibernate.Linq.Tests
 		[Test]
 		public void AggregateWithCustomFunction()
 		{
+			MethodTranslatorRegistry.Current.RegisterTranslator(typeof(SqlFunctionExtensions),typeof(DBFunctionMethodTranslator));
 			var date = new DateTime(1960, 1, 1);
 
 			var query = (from e in db.Employees

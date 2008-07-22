@@ -82,7 +82,15 @@ namespace NHibernate.Linq.Tests
 
             Assert.AreEqual(1, query.Count);
         }
+		[Test]
+		public void TimeSheetsWithAverageWithLambdaSubquery()
+		{
+			var query = (from timesheet in session.Linq<Timesheet>()
+						 where timesheet.Entries.Average(e => e.NumberOfHours+e.Id) > 12
+						 select timesheet).ToList();
 
+			Assert.AreEqual(1, query.Count);
+		}
         [Test]
         public void TimeSheetsWithAverageSubqueryReversed()
         {
@@ -241,7 +249,7 @@ namespace NHibernate.Linq.Tests
 		public void TimeSheetsWithSumSubqueryComparedToProperty()
         {
             var query = (from timesheet in session.Linq<Timesheet>()
-                         where timesheet.Entries.Sum(e => e.NumberOfHours) <= timesheet.Id*15
+                         where timesheet.Entries.Sum(e => e.NumberOfHours) >= timesheet.Id * 13
                          select timesheet).ToList();
 
             Assert.AreEqual(1, query.Count);

@@ -20,7 +20,7 @@ namespace NHibernate.Linq.Tests
         public void CanGetCountOnQueryWithAnonymousType()
         {
             var query = from user in session.Linq<User>()
-                        select new { user.Name, RoleName = user.Role.Name };
+                        select new {user.Name, RoleName = user.Role.Name };
 
             int totalCount = query.Count();
 
@@ -143,8 +143,7 @@ namespace NHibernate.Linq.Tests
             var query = from user in session.Linq<User>()
                         select new
                         {
-                            user.Name,
-                            IsSmall = (user.Enum1 == EnumStoredAsString.Small)
+                            user.Name
                         };
 
             var list = query.ToList();

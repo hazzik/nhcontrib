@@ -5446,12 +5446,12 @@
             Calling Configure(XmlReader) will overwrite the values set in app.config or web.config
             </remarks>
         </member>
-        <member name="M:NHibernate.Cfg.Configuration.SetCacheConcurrencyStrategy(System.Type,System.String)">
+        <member name="M:NHibernate.Cfg.Configuration.SetCacheConcurrencyStrategy(System.String,System.String)">
             <summary>
             Set up a cache for an entity class
             </summary>
         </member>
-        <member name="M:NHibernate.Cfg.Configuration.SetCacheConcurrencyStrategy(System.String,System.String)">
+        <member name="M:NHibernate.Cfg.Configuration.SetCollectionCacheConcurrencyStrategy(System.String,System.String)">
             <summary>
             Set up a cache for a collection role
             </summary>
@@ -5747,6 +5747,9 @@
         </member>
         <member name="F:NHibernate.Cfg.Environment.DefaultCatalog">
             <summary> A default database catalog name to use for unqualified tablenames</summary>
+        </member>
+        <member name="F:NHibernate.Cfg.Environment.DefaultEntityMode">
+            <summary>The EntityMode in which set the Session opened from the SessionFactory.</summary>
         </member>
         <member name="F:NHibernate.Cfg.Environment.QueryStartupChecking">
             <summary> Should named queries be checked during startup (the default is enabled). </summary>
@@ -9166,6 +9169,13 @@
             result set.
             </summary>
         </member>
+        <member name="M:NHibernate.Criterion.Order.#ctor(NHibernate.Criterion.IProjection,System.Boolean)">
+            <summary>
+            Constructor for Order.
+            </summary>
+            <param name="projection"></param>
+            <param name="ascending"></param>
+        </member>
         <member name="M:NHibernate.Criterion.Order.#ctor(System.String,System.Boolean)">
             <summary>
             Constructor for Order.
@@ -9183,6 +9193,20 @@
             Ascending order
             </summary>
             <param name="propertyName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NHibernate.Criterion.Order.Asc(NHibernate.Criterion.IProjection)">
+            <summary>
+            Ascending order
+            </summary>
+            <param name="projection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NHibernate.Criterion.Order.Desc(NHibernate.Criterion.IProjection)">
+            <summary>
+            Descending order
+            </summary>
+            <param name="projection"></param>
             <returns></returns>
         </member>
         <member name="M:NHibernate.Criterion.Order.Desc(System.String)">
@@ -9255,6 +9279,13 @@
             </summary>
             <returns>The RowCount projection mapped to an <see cref="T:System.Int64"/>.</returns>
         </member>
+        <member name="M:NHibernate.Criterion.Projections.Count(NHibernate.Criterion.IProjection)">
+            <summary>
+            A property value count
+            </summary>
+            <param name="projection"></param>
+            <returns></returns>
+        </member>
         <member name="M:NHibernate.Criterion.Projections.Count(System.String)">
             <summary>
             A property value count
@@ -9306,7 +9337,7 @@
         </member>
         <member name="M:NHibernate.Criterion.Projections.Avg(NHibernate.Criterion.IProjection)">
             <summary>
-            A projection average value
+            A property average value
             </summary>
             <param name="projection"></param>
             <returns></returns>
@@ -9320,7 +9351,7 @@
         </member>
         <member name="M:NHibernate.Criterion.Projections.Sum(NHibernate.Criterion.IProjection)">
             <summary>
-            A projection value sum
+            A property value sum
             </summary>
             <param name="projection"></param>
             <returns></returns>
@@ -17649,6 +17680,9 @@
             </summary>
             <param name="entityMode">The entity mode to use for the new session.</param>
             <returns>The new session</returns>
+        </member>
+        <member name="P:NHibernate.ISession.ActiveEntityMode">
+            <summary> The entity mode in effect for this session.</summary>
         </member>
         <member name="P:NHibernate.ISession.FlushMode">
             <summary>
