@@ -31,7 +31,7 @@ namespace NHibernate.Linq
 			expression = AssociationVisitor.RewriteWithAssociations(_session.SessionFactory, expression);
 			expression = CollectionAliasVisitor.AssignCollectionAccessAliases(expression);
 			expression = new PropertyToMethodVisitor().Visit(expression);
-			expression = new BinaryExpressionOrderer().Visit(expression);
+			//expression = new BinaryExpressionOrderer().Visit(expression);
 
 			NHibernateQueryTranslator translator = new NHibernateQueryTranslator(_session);
 			object results = translator.Translate(expression,this.queryOptions);

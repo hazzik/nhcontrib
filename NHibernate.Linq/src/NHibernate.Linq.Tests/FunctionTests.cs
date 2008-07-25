@@ -13,7 +13,7 @@ namespace NHibernate.Linq.Tests
 		public void LeftFunction()
 		{
 			var query = from e in db.Employees
-						where e.FirstName.Left( 2) == "An"
+						where e.FirstName.Left(2) == "An"
 						select e.FirstName.Left(3);
 			var results = query.ToList();
 			foreach (var r in results)

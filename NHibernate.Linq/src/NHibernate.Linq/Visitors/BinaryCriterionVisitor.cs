@@ -26,6 +26,7 @@ namespace NHibernate.Linq.Visitors
         }
 
 		public IProjection Projection { get; protected set; }
+		public System.Type ConvertTo { get; private set; }
 
         protected override Expression VisitMethodCall(MethodCallExpression expr)
         {
@@ -70,6 +71,7 @@ namespace NHibernate.Linq.Visitors
         {
             if (expr.NodeType == ExpressionType.Convert)
             {
+				ConvertTo = expr.Operand.Type;
                 //convert to the type of the operand, not the type of the conversion
                 Visit(expr.Operand);
             }
@@ -78,7 +80,7 @@ namespace NHibernate.Linq.Visitors
         }
 
 
-		public static IProjection[] GetBinaryCriteria(
+		public static ICriterion GetBinaryCriteria(
 			ICriteria rootCriteria,
 			ISession session,
 			BinaryExpression expr)
@@ -86,22 +88,75 @@ namespace NHibernate.Linq.Visitors
 			var projections = new IProjection[2];
 			var leftVisitor = new BinaryCriterionVisitor(rootCriteria, session);
 			var rightVisitor = new BinaryCriterionVisitor(rootCriteria, session);
+			leftVisitor.Visit(expr.Left);
+			rightVisitor.Visit(expr.Right);
+			Func<IProjection, IProjection, ICriterion> action = delegate { throw new InvalidOperationException(); };
 
-			if (expr.Left is ConstantExpression && ((ConstantExpression)expr.Left).Value == null)
-				projections[0] = null;
-			else
+			switch (expr.NodeType)
 			{
-				leftVisitor.Visit(expr.Left);
-				projections[0] = leftVisitor.Projection;
+				case ExpressionType.Equal:
+					action = delegate(IProjection lp, IProjection rp)
+					         	{
+									if(expr.Right.NodeType==ExpressionType.Constant)
+									{
+										var right = expr.Right as ConstantExpression;
+										if (right.Value == null)
+											return Restrictions.IsNull(lp);
+										else if(lp is PropertyProjection && leftVisitor.ConvertTo!=null)
+										{
+											var leftProjectionAsProp = lp as PropertyProjection;
+											return Restrictions.Eq(leftProjectionAsProp.PropertyName,
+											                LinqUtil.ChangeType(right.Value, leftVisitor.ConvertTo));
+										}
+										return Restrictions.Eq(leftVisitor.Projection,right.Value);
+									}
+									else
+										return Restrictions.EqProperty(leftVisitor.Projection, rightVisitor.Projection);
+					         	};
+					break;
+
+				case ExpressionType.GreaterThan:
+					action = Restrictions.GtProperty;
+					break;
+
+				case ExpressionType.GreaterThanOrEqual:
+					action = Restrictions.GeProperty;
+					break;
+
+				case ExpressionType.LessThan:
+					action = Restrictions.LtProperty;
+					break;
+
+				case ExpressionType.LessThanOrEqual:
+					action = Restrictions.LeProperty;
+					break;
+
+				case ExpressionType.NotEqual:
+					action = delegate(IProjection lp, IProjection rp)
+					{
+						ICriterion criterion;
+						if (expr.Right.NodeType == ExpressionType.Constant)
+						{
+							var right = expr.Right as ConstantExpression;
+							if (right.Value == null)
+								criterion= Restrictions.IsNull(lp);
+							else if (lp is PropertyProjection && leftVisitor.ConvertTo != null)
+							{
+								var leftProjectionAsProp = lp as PropertyProjection;
+								criterion=Restrictions.Eq(leftProjectionAsProp.PropertyName,
+												LinqUtil.ChangeType(right.Value, leftVisitor.ConvertTo));
+							}
+							else
+								criterion = Restrictions.Eq(leftVisitor.Projection, right.Value);
+						}
+						else
+							criterion = Restrictions.EqProperty(leftVisitor.Projection, rightVisitor.Projection);
+						return Restrictions.Not(criterion);
+					};
+					break;
 			}
-			if (expr.Right is ConstantExpression && ((ConstantExpression)expr.Right).Value == null)
-				projections[1] = null;
-			else
-			{
-				rightVisitor.Visit(expr.Right);
-				projections[1] = rightVisitor.Projection;
-			}
-			return projections;
+	
+			return action(leftVisitor.Projection,rightVisitor.Projection);
 		}
     }
 	

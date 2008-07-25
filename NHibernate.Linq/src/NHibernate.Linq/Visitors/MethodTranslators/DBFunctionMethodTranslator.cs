@@ -41,7 +41,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			var projections = new IProjection[expression.Arguments.Count];
 			for (int i = 0; i < expression.Arguments.Count; i++)
 			{
-
+				
 				var visitor = new SelectArgumentsVisitor(rootCriteria, this.session);
 				visitor.Visit(expression.Arguments[i]);
 				projections[i] = visitor.Projection;
