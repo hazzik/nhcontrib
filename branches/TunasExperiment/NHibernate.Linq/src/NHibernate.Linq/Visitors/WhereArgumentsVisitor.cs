@@ -93,57 +93,8 @@ namespace NHibernate.Linq.Visitors
 
         private void VisitBinaryCriterionExpression(BinaryExpression expr)
         {
-			var projections = BinaryCriterionVisitor.GetBinaryCriteria(this.rootCriteria, this.session, expr);
-        	Compare action;
-        	var left = projections[0];
-        	var right = projections[1];
-			switch (expr.NodeType)
-			{
-				case ExpressionType.Equal:
-					action = delegate(IProjection pr1, IProjection pr2)
-					         	{
-									if (pr1 == null)
-										return Restrictions.IsNull(right);
-									else if (pr2 == null)
-										return Restrictions.IsNull(left);
-									else
-										return Restrictions.EqProperty(left, right);
-								};
-					break;
-
-				case ExpressionType.GreaterThan:
-					action = (l,r)=>Restrictions.GtProperty(left, right);
-					break;
-
-				case ExpressionType.GreaterThanOrEqual:
-					action = (l, r) => Restrictions.GeProperty(left, right);
-					break;
-
-				case ExpressionType.LessThan:
-					action = (l, r) => Restrictions.LtProperty(left, right);
-					break;
-
-				case ExpressionType.LessThanOrEqual:
-					action = (l, r) => Restrictions.LeProperty(left, right);
-					break;
-
-				case ExpressionType.NotEqual:
-					action = delegate(IProjection pr1, IProjection pr2)
-					         	{
-					         		if (pr1 == null)
-					         			return Restrictions.IsNotNull(right);
-					         		else if (pr2 == null)
-					         			return Restrictions.IsNotNull(left);
-					         		else
-					         			return Restrictions.EqProperty(left, right);
-					         	};
-					break;
-				default:
-					throw new InvalidOperationException();
-					break;
-			}
-        	var criterion = action(left, right);
-			CurrentCriterions.Add(criterion);
+			var criterions = BinaryCriterionVisitor.GetBinaryCriteria(this.rootCriteria, this.session, expr);
+			CurrentCriterions.Add(criterions);
         }
 
         protected override Expression VisitUnary(UnaryExpression expr)

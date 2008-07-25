@@ -143,7 +143,8 @@ namespace NHibernate.Linq.Tests
             var query = from user in session.Linq<User>()
                         select new
                         {
-                            user.Name
+                            user.Name,
+                            IsSmall = (user.Enum1 == EnumStoredAsString.Small)
                         };
 
             var list = query.ToList();
