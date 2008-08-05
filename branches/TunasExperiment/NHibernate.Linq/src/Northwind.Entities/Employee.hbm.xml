@@ -19,6 +19,7 @@
     <property name="Region" type="System.String" column="Region" not-null="false" />
     <property name="Title" type="System.String" column="Title" not-null="false" />
     <property name="TitleOfCourtesy" type="System.String" column="TitleOfCourtesy" not-null="false" />
+		<many-to-one name="ReportsTo" column="ReportsTo" class="Northwind.Entities.Employee, Northwind.Entities"/>
     <bag name="Employees" inverse="false" lazy="true" cascade="none">
       <key>
         <column name="EmployeeID" not-null="true" />

@@ -82,7 +82,7 @@ namespace NHibernate.Linq.Tests
 		{
 			var query = from e in db.Employees
 			            where e.FirstName.Contains("a")
-			            select e.FirstName.IndexOf('A', 3);
+			            select e.FirstName.IndexOf('b');
 
 			ObjectDumper.Write(query);
 		}
@@ -91,11 +91,12 @@ namespace NHibernate.Linq.Tests
 		public void TwoFunctionExpression()
 		{
 			var query = from e in db.Employees
-			            where e.FirstName.Left(1) == e.LastName.Left(1)
+						where e.FirstName.Substring(1, 1) == e.LastName.Substring(1, 1)
 			            select new {Name = e.FirstName, LastName = e.LastName};
 
 			var results = query.ToList();
-			results.Each(x=>Assert.AreEqual(x.Name.Substring(0,1),x.LastName.Substring(0,1)));
+			Assert.Greater(results.Count, 0);
+			results.Each(x=>Assert.AreEqual(x.Name.Substring(1,1),x.LastName.Substring(1,1)));
 		}
 	}
 }

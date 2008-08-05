@@ -22,10 +22,10 @@ namespace NHibernate.Linq.Visitors
     {
         #region Fields & Properties
 
-        private static readonly ISQLFunction arithmaticAddition = new VarArgsSQLFunction("(", "+", ")");
-		private static readonly ISQLFunction arithmaticDivide = new VarArgsSQLFunction("(", "/", ")");
-		private static readonly ISQLFunction arithmaticMultiply = new VarArgsSQLFunction("(", "*", ")");
-		private static readonly ISQLFunction arithmaticSubstract = new VarArgsSQLFunction("(", "-", ")");
+        internal static readonly ISQLFunction arithmaticAddition = new VarArgsSQLFunction("(", "+", ")");
+		internal static readonly ISQLFunction arithmaticDivide = new VarArgsSQLFunction("(", "/", ")");
+		internal static readonly ISQLFunction arithmaticMultiply = new VarArgsSQLFunction("(", "*", ")");
+		internal static readonly ISQLFunction arithmaticSubstract = new VarArgsSQLFunction("(", "-", ")");
 
         private readonly ICriteria _rootCriteria;
         private readonly ISession _session;
@@ -79,7 +79,7 @@ namespace NHibernate.Linq.Visitors
         {
         	IMethodTranslator tr = MethodTranslatorRegistry.Current.GetTranslatorInstanceForMethod(expr.Method);
 			tr.Initialize(this._session,this._rootCriteria);
-        	this._projections.Add(tr.GetProjection(expr));
+        	this._projections.Add(tr.GetProjection(expr).Projections);
         	return expr;
         }
 
@@ -92,6 +92,11 @@ namespace NHibernate.Linq.Visitors
         protected override NewExpression VisitNew(NewExpression expr)
         {
             NewExpression newExpr = base.VisitNew(expr);
+        	foreach (var argument in newExpr.Arguments)
+        	{
+        		var selectVisitor = new SelectArgumentsVisitor(this._rootCriteria, this._session);
+        		selectVisitor.Visit(argument);
+        	}
             _transformer = new TypeSafeConstructorMemberInitResultTransformer(expr);
             return newExpr;
         }
@@ -256,6 +261,12 @@ namespace NHibernate.Linq.Visitors
 
             return expr;
         }
+
+		protected override Expression VisitCollectionAccess(CollectionAccessExpression expr)
+		{
+			_projections.Add(new CollectionProjection(expr));
+			return expr;
+		}
 
         protected override Expression VisitPropertyAccess(PropertyAccessExpression expr)
         {

@@ -44,7 +44,7 @@ namespace NHibernate.Linq.Visitors
         {
         	IMethodTranslator translator=MethodTranslatorRegistry.Current.GetTranslatorInstanceForMethod(expr.Method);
 			translator.Initialize(this.session,this.rootCriteria);
-        	var projection = translator.GetProjection(expr);
+        	var projection = translator.GetProjection(expr).Projections;
         	var criterion = Restrictions.Eq(projection, true);
 			CurrentCriterions.Add(criterion);
             return expr;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Northwind.Entities;
+using System.Collections;
+using NHibernate.Transform;
 
 namespace NHibernate.Linq.Tests
 {
@@ -176,14 +178,14 @@ namespace NHibernate.Linq.Tests
 				from c in db.Customers
 				select new { c.ContactName, c.Phone };
 			var items = q.ToList();
-			
+
 			Assert.AreEqual(91, items.Count);
-			
+
 			items.Each(x =>
-			           	{
-			           		Assert.IsNotNull(x.ContactName);
-			           		Assert.IsNotNull(x.Phone);
-			           	});
+						{
+							Assert.IsNotNull(x.ContactName);
+							Assert.IsNotNull(x.Phone);
+						});
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -272,8 +274,8 @@ namespace NHibernate.Linq.Tests
 			var q =
 				from p in db.Products
 				select new { p.ProductName, Availability = p.UnitsInStock - p.UnitsOnOrder < 0 ? "Out Of Stock" : "In Stock" };
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -284,8 +286,8 @@ namespace NHibernate.Linq.Tests
 			var q =
 				from e in db.Employees
 				select new Name { FirstName = e.FirstName, LastName = e.LastName };
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -298,8 +300,8 @@ namespace NHibernate.Linq.Tests
 				from c in db.Customers
 				where c.City == "London"
 				select c.ContactName;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -316,8 +318,8 @@ namespace NHibernate.Linq.Tests
 							CompanyInfo = new { c.CompanyName, c.City, c.Country },
 							ContactInfo = new { c.ContactName, c.ContactTitle }
 						};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -340,10 +342,14 @@ namespace NHibernate.Linq.Tests
 					select od,
 							FreeShippingDiscount = o.Freight
 						};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
-
+		public class Deneme
+		{
+			public int OrderID { get; set; }
+			IList od { get; set; }
+		}
 		[Category("SELECT/DISTINCT")]
 		[Test]
 		[Description("This sample uses nested queries to return a sequence of " +
@@ -351,21 +357,31 @@ namespace NHibernate.Linq.Tests
 					 "items in the order where there is a discount, and the money " +
 					 "saved if shipping is not included.")]
 		[Ignore("TODO")]
+
 		public void DLinq17b()
 		{
-			var q =
-				from o in db.Orders
-				select new
-						{
-							o.OrderID,
-							DiscountedProducts =
-					from od in o.OrderDetails.Cast<OrderDetail>()
-					where od.Discount > 0.0f
-					select new { od.Quantity, od.UnitPrice },
-							FreeShippingDiscount = o.Freight
-						};
+			//var realcriteria=this.session.CreateCriteria(typeof(Order));
+			//var childcriteria=realcriteria
+			//.CreateCriteria("OrderDetails","od",NHibernate.SqlCommand.JoinType.InnerJoin);
+			//childcriteria.Add(NHibernate.Criterion.Restrictions.Gt("Discount",0.0f));
+			//childcriteria.SetProjection(NHibernate.Criterion.Projections.Alias(NHibernate.Criterion.Projections.Id(),"al"));
+			//realcriteria.SetResultTransformer(new AliasToEntityMapResultTransformer());
 
-			ObjectDumper.Write(q, 1);
+			//IList list=realcriteria.List();
+
+			var q =
+			    from o in db.Orders
+			    select new
+			            {
+			                o.OrderID,
+			                DiscountedProducts =
+			       (from od in o.OrderDetails
+			        where od.Discount > 0.0f
+			        select new { od.Quantity, od.UnitPrice }),
+			                FreeShippingDiscount = o.Freight
+			            };
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -389,8 +405,8 @@ namespace NHibernate.Linq.Tests
 					select od,
 							FreeShippingDiscount = o.Freight
 						};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("SELECT/DISTINCT")]
@@ -403,8 +419,8 @@ namespace NHibernate.Linq.Tests
 						from c in db.Customers
 						select c.City)
 				.Distinct();
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		#endregion Select/Distinct Tests
@@ -485,8 +501,8 @@ namespace NHibernate.Linq.Tests
 					where p2.UnitPrice == g.Min(p3 => p3.UnitPrice)
 					select p2
 							};
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		[Category("COUNT/SUM/MIN/MAX/AVG")]
@@ -526,8 +542,8 @@ namespace NHibernate.Linq.Tests
 					where p2.UnitPrice == g.Max(p3 => p3.UnitPrice)
 					select p2
 							};
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		[Category("COUNT/SUM/MIN/MAX/AVG")]
@@ -567,8 +583,8 @@ namespace NHibernate.Linq.Tests
 					where p2.UnitPrice > g.Average(p3 => p3.UnitPrice)
 					select p2
 							};
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		#endregion Count/Sum/Min/Max/Avg Test
@@ -586,87 +602,87 @@ namespace NHibernate.Linq.Tests
 				from o in c.Orders.Cast<Order>()
 				where c.City == "London"
 				select o;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
-        [Category("JOIN")]
-        [Test]
-        [Description("This sample uses foreign key navigation in the " +
-                     "from clause to select all orders for customers in London.")]
-        public void DLinqJoin1a()
-        {
-            var q =
-                from c in db.Customers
-                from o in c.Orders.Cast<Order>()
-                where c.City == "London"
-                select new { o.OrderDate, o.ShipRegion };
+		[Category("JOIN")]
+		[Test]
+		[Description("This sample uses foreign key navigation in the " +
+					 "from clause to select all orders for customers in London.")]
+		public void DLinqJoin1a()
+		{
+			var q =
+				from c in db.Customers
+				from o in c.Orders.Cast<Order>()
+				where c.City == "London"
+				select new { o.OrderDate, o.ShipRegion };
+			q.ToList();
+			//ObjectDumper.Write(q);
+		}
 
-            ObjectDumper.Write(q);
-        }
+		[Category("JOIN")]
+		[Test]
+		[Description("This sample uses foreign key navigation in the " +
+					 "from clause to select all orders for customers in London.")]
+		public void DLinqJoin1b()
+		{
+			var q =
+				from c in db.Customers
+				from o in c.Orders.Cast<Order>()
+				where c.City == "London"
+				select new { c.City, o.OrderDate, o.ShipRegion };
+			q.ToList();
+			//ObjectDumper.Write(q);
+		}
 
-        [Category("JOIN")]
-        [Test]
-        [Description("This sample uses foreign key navigation in the " +
-                     "from clause to select all orders for customers in London.")]
-        public void DLinqJoin1b()
-        {
-            var q =
-                from c in db.Customers
-                from o in c.Orders.Cast<Order>()
-                where c.City == "London"
-                select new { c.City, o.OrderDate, o.ShipRegion };
+		[Category("JOIN")]
+		[Test]
+		[Description("This sample uses foreign key navigation in the " +
+					 "from clause to select all orders for customers.")]
+		public void DLinqJoin1c()
+		{
+			var q =
+				from c in db.Customers
+				from o in c.Orders.Cast<Order>()
+				select o;
 
-            ObjectDumper.Write(q);
-        }
+			var list = q.ToList();
 
-        [Category("JOIN")]
-        [Test]
-        [Description("This sample uses foreign key navigation in the " +
-                     "from clause to select all orders for customers.")]
-        public void DLinqJoin1c()
-        {
-            var q =
-                from c in db.Customers
-                from o in c.Orders.Cast<Order>()
-                select o;
+			//ObjectDumper.Write(q);
+		}
 
-            var list = q.ToList();
+		[Category("JOIN")]
+		[Test]
+		[Description("This sample uses foreign key navigation in the " +
+					 "from clause to select all orders for customers.")]
+		public void DLinqJoin1d()
+		{
+			var q =
+				from c in db.Customers
+				from o in c.Orders.Cast<Order>()
+				select o.OrderDate;
 
-            ObjectDumper.Write(q);
-        }
+			var list = q.ToList();
 
-        [Category("JOIN")]
-        [Test]
-        [Description("This sample uses foreign key navigation in the " +
-                     "from clause to select all orders for customers.")]
-        public void DLinqJoin1d()
-        {
-            var q =
-                from c in db.Customers
-                from o in c.Orders.Cast<Order>()
-                select o.OrderDate;
+			//ObjectDumper.Write(q);
+		}
 
-            var list = q.ToList();
+		[Category("JOIN")]
+		[Test]
+		[Description("This sample uses foreign key navigation in the " +
+					 "from clause to select all orders for customers.")]
+		public void DLinqJoin1e()
+		{
+			var q =
+				from c in db.Customers
+				from o in c.Orders.Cast<Order>()
+				select c;
 
-            ObjectDumper.Write(q);
-        }
+			var list = q.ToList();
 
-        [Category("JOIN")]
-        [Test]
-        [Description("This sample uses foreign key navigation in the " +
-                     "from clause to select all orders for customers.")]
-        public void DLinqJoin1e()
-        {
-            var q =
-                from c in db.Customers
-                from o in c.Orders.Cast<Order>()
-                select c;
-
-            var list = q.ToList();
-
-            ObjectDumper.Write(q);
-        }
+			//ObjectDumper.Write(q);
+		}
 
 		[Category("JOIN")]
 		[Test]
@@ -679,8 +695,8 @@ namespace NHibernate.Linq.Tests
 				from p in db.Products
 				where p.Supplier.Country == "USA" && p.UnitsInStock == 0
 				select p;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -696,8 +712,8 @@ namespace NHibernate.Linq.Tests
 				from et in e.EmployeeTerritories.Cast<EmployeeTerritory>()
 				where e.City == "Seattle"
 				select new { e.FirstName, e.LastName, et.PK_EmployeeTerritories.Territory.TerritoryDescription };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -720,8 +736,8 @@ namespace NHibernate.Linq.Tests
 							LastName2 = e2.LastName,
 							e1.City
 						};
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -734,8 +750,8 @@ namespace NHibernate.Linq.Tests
 				from c in db.Customers
 				join o in db.Orders on c.CustomerID equals o.Customer.CustomerID into orders
 				select new { c.ContactName, OrderCount = orders.Count() };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -749,8 +765,8 @@ namespace NHibernate.Linq.Tests
 				join o in db.Orders on c.CustomerID equals o.Customer.CustomerID into ords
 				join e in db.Employees on c.City equals e.City into emps
 				select new { c.ContactName, ords = ords.Count(), emps = emps.Count() };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -766,8 +782,8 @@ namespace NHibernate.Linq.Tests
 				join o in db.Orders on e equals o.Employee into ords
 				from o in ords.DefaultIfEmpty()
 				select new { e.FirstName, e.LastName, Order = o };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -782,8 +798,8 @@ namespace NHibernate.Linq.Tests
 				let z = c.City + c.Country
 				from o in ords
 				select new { c.ContactName, o.OrderID, z };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -800,8 +816,8 @@ namespace NHibernate.Linq.Tests
 					into details
 				from d in details
 				select new { o.OrderID, p.ProductID, d.UnitPrice };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("JOIN")]
@@ -816,8 +832,8 @@ namespace NHibernate.Linq.Tests
 					on o.Employee.EmployeeID equals (int?)e.EmployeeID into emps
 				from e in emps
 				select new { o.OrderID, e.FirstName };
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		#endregion Join Tests
@@ -834,8 +850,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				orderby e.HireDate
 				select e;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("ORDER BY")]
@@ -849,8 +865,8 @@ namespace NHibernate.Linq.Tests
 				where o.ShipCity == "London"
 				orderby o.Freight
 				select o;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("ORDER BY")]
@@ -863,8 +879,8 @@ namespace NHibernate.Linq.Tests
 				from p in db.Products
 				orderby p.UnitPrice descending
 				select p;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("ORDER BY")]
@@ -877,8 +893,8 @@ namespace NHibernate.Linq.Tests
 				from c in db.Customers
 				orderby c.City, c.ContactName
 				select c;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("ORDER BY")]
@@ -892,8 +908,8 @@ namespace NHibernate.Linq.Tests
 				where o.Employee.EmployeeID == 1
 				orderby o.ShipCountry, o.Freight descending
 				select o;
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 
@@ -917,8 +933,8 @@ namespace NHibernate.Linq.Tests
 					where p2.UnitPrice == g.Max(p3 => p3.UnitPrice)
 					select p2
 							};
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		#endregion Order By Tests
@@ -938,15 +954,15 @@ namespace NHibernate.Linq.Tests
 					into g
 					select g;
 
-			ObjectDumper.Write(q, 1);
-
+			//ObjectDumper.Write(q, 1);
+			q.ToList();
 			foreach (var o in q)
 			{
 				Console.WriteLine("\n{0}\n", o);
 
 				foreach (var p in o)
 				{
-					ObjectDumper.Write(p);
+					//ObjectDumper.Write(p);
 				}
 			}
 		}
@@ -967,8 +983,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								MaxPrice = g.Max(p => p.UnitPrice)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -986,8 +1002,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								MinPrice = g.Min(p => p.UnitPrice)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1005,8 +1021,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								AveragePrice = g.Average(p => p.UnitPrice)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1024,8 +1040,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								TotalPrice = g.Sum(p => p.UnitPrice)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1043,8 +1059,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								NumProducts = g.Count()
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1063,8 +1079,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								NumProducts = g.Count(p => p.Discontinued)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1083,8 +1099,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								NumProducts = g.Count(p => !p.Discontinued)
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1103,8 +1119,8 @@ namespace NHibernate.Linq.Tests
 								g.Key,
 								ProductCount = g.Count()
 							};
-
-			ObjectDumper.Write(q, 1);
+			q.ToList();
+			//ObjectDumper.Write(q, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1118,8 +1134,8 @@ namespace NHibernate.Linq.Tests
 				group p by new { p.Category.CategoryID, p.Supplier.SupplierID }
 					into g
 					select new { g.Key, g };
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		[Category("GROUP BY/HAVING")]
@@ -1135,8 +1151,8 @@ namespace NHibernate.Linq.Tests
 				group p by new { Criterion = p.UnitPrice > 10 }
 					into g
 					select g;
-
-			ObjectDumper.Write(categories, 1);
+			categories.ToList();
+			//ObjectDumper.Write(categories, 1);
 		}
 
 		#endregion Group By Methods
@@ -1153,10 +1169,10 @@ namespace NHibernate.Linq.Tests
 				where !c.Orders.Cast<Order>().Any()
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Customer c in q)
-                Assert.IsTrue(!c.Orders.Cast<Order>().Any());
+			foreach (Customer c in q)
+				Assert.IsTrue(!c.Orders.Cast<Order>().Any());
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1169,10 +1185,10 @@ namespace NHibernate.Linq.Tests
 				where c.Orders.Cast<Order>().Any()
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Customer c in q)
-                Assert.IsTrue(c.Orders.Cast<Order>().Any());
+			foreach (Customer c in q)
+				Assert.IsTrue(c.Orders.Cast<Order>().Any());
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1186,10 +1202,10 @@ namespace NHibernate.Linq.Tests
 				where c.Products.Cast<Product>().Any(p => p.Discontinued)
 				select c;
 
-            ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Category c in q)
-                Assert.IsTrue(c.Products.Cast<Product>().Any(p => p.Discontinued));
+			foreach (Category c in q)
+				Assert.IsTrue(c.Products.Cast<Product>().Any(p => p.Discontinued));
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1203,10 +1219,10 @@ namespace NHibernate.Linq.Tests
 				where c.Products.Cast<Product>().Any(p => !p.Discontinued)
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Category c in q)
-                Assert.IsTrue(c.Products.Cast<Product>().Any(p => !p.Discontinued));
+			foreach (Category c in q)
+				Assert.IsTrue(c.Products.Cast<Product>().Any(p => !p.Discontinued));
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1220,10 +1236,10 @@ namespace NHibernate.Linq.Tests
 				where !c.Products.Cast<Product>().Any(p => p.Discontinued)
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Category c in q)
-                Assert.IsTrue(!c.Products.Cast<Product>().Any(p => p.Discontinued));
+			foreach (Category c in q)
+				Assert.IsTrue(!c.Products.Cast<Product>().Any(p => p.Discontinued));
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1237,10 +1253,10 @@ namespace NHibernate.Linq.Tests
 				where !c.Products.Cast<Product>().Any(p => !p.Discontinued)
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Category c in q)
-                Assert.IsTrue(!c.Products.Cast<Product>().Any(p => !p.Discontinued));
+			foreach (Category c in q)
+				Assert.IsTrue(!c.Products.Cast<Product>().Any(p => !p.Discontinued));
 		}
 
 		[Category("EXISTS/IN/ANY/ALL")]
@@ -1255,10 +1271,10 @@ namespace NHibernate.Linq.Tests
 				where c.Orders.Cast<Order>().All(o => o.ShipCity == c.City)
 				select c;
 
-			ObjectDumper.Write(q);
+			//ObjectDumper.Write(q);
 
-            foreach (Customer c in q)
-                Assert.IsTrue(c.Orders.Cast<Order>().All(o => o.ShipCity == c.City));
+			foreach (Customer c in q)
+				Assert.IsTrue(c.Orders.Cast<Order>().All(o => o.ShipCity == c.City));
 		}
 
 		#endregion Exists/In/Any/All Methods
@@ -1282,8 +1298,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				select e.HomePhone
 				);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("UNION ALL/UNION/INTERSECT")]
@@ -1300,8 +1316,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				select new { Name = e.FirstName + " " + e.LastName, Phone = e.HomePhone }
 				);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("UNION ALL/UNION/INTERSECT")]
@@ -1318,8 +1334,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				select e.Country
 				);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("UNION ALL/UNION/INTERSECT")]
@@ -1336,8 +1352,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				select e.Country
 				);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("UNION ALL/UNION/INTERSECT")]
@@ -1354,8 +1370,8 @@ namespace NHibernate.Linq.Tests
 				from e in db.Employees
 				select e.Country
 				);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		#endregion Union Methods
@@ -1372,8 +1388,8 @@ namespace NHibernate.Linq.Tests
 						orderby e.HireDate
 						select e)
 				.Take(5);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("TOP/BOTTOM")]
@@ -1386,8 +1402,8 @@ namespace NHibernate.Linq.Tests
 						orderby p.UnitPrice descending
 						select p)
 				.Skip(10);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("Paging")]
@@ -1403,8 +1419,8 @@ namespace NHibernate.Linq.Tests
 						select c)
 				.Skip(50)
 				.Take(10);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		[Category("Paging")]
@@ -1422,10 +1438,20 @@ namespace NHibernate.Linq.Tests
 						orderby p.ProductID
 						select p)
 				.Take(10);
-
-			ObjectDumper.Write(q);
+			q.ToList();
+			//ObjectDumper.Write(q);
 		}
 
 		#endregion Top/Bottom/Paging Methods
+
+
+		[Category("WHERE")]
+		[Test]
+		[Description("This sample uses Where to select all Employees objects by parent ID.")]
+		public void DLinq64()
+		{
+			IList<Employee> foundEmps = db.Employees.Where(e => e.ReportsTo.EmployeeID == 2).ToList();
+			Assert.AreEqual(5, foundEmps.Count);
+		}
 	}
 }

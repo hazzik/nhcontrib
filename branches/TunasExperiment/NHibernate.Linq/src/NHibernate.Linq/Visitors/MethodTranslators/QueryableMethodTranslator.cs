@@ -19,7 +19,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		}
 		private  ISession session;
 		private ICriteria rootCriteria;
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
 			switch(expression.Method.Name)
 			{
@@ -31,7 +31,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 			}
 		}
-		protected IProjection GetAggregateProjection(MethodCallExpression expression)
+		protected ProjectionWithImplication GetAggregateProjection(MethodCallExpression expression)
 		{
 			if (!(expression.Arguments.Count > 1))
 				throw new InvalidOperationException();
@@ -56,11 +56,12 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 				default:
 					throw new InvalidOperationException();
 			}
-			return action(temp.Projection);
+			var projection= action(temp.Projection);
+			return new ProjectionWithImplication(projection);
 
 		}
 
-		public virtual IProjection GetCountProjection(MethodCallExpression expression)
+		public virtual ProjectionWithImplication GetCountProjection(MethodCallExpression expression)
 		{
 			if (expression.Arguments.Count > 1)//Means we have lambda, horay!
 			{
@@ -70,7 +71,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 				temp.CurrentCriterions.Each(x=>this.rootCriteria.Add(x));
 			}
-			return Projections.RowCount();
+			return new ProjectionWithImplication(Projections.RowCount());
 		}
 	}
 }

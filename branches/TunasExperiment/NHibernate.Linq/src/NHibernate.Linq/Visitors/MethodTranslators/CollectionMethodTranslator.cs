@@ -22,7 +22,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 		private ISession session;
 		private ICriteria rootCriteria;
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
 			switch(expression.Method.Name)
 			{
@@ -33,7 +33,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			}
 
 		}
-		protected virtual IProjection GetContainsProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjection(MethodCallExpression expression)
 		{
 			EntityExpression rootEntity = EntityExpressionVisitor.FirstEntity(expression.Object);
 
@@ -52,8 +52,8 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			query.Add(Restrictions.Eq(collectionIdPropertyName, idValue));
 
 			string identifierName = rootEntity.MetaData.IdentifierPropertyName;
-			return Projections.Conditional(Subqueries.PropertyIn(identifierName, query), Projections.Constant(true),
-			                               Projections.Constant(false));
+			return new ProjectionWithImplication(Projections.Conditional(Subqueries.PropertyIn(identifierName, query), Projections.Constant(true),
+			                               Projections.Constant(false)));
 		}
 		#endregion
 	}

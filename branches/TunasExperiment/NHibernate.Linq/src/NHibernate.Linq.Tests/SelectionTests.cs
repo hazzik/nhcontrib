@@ -16,6 +16,15 @@ namespace NHibernate.Linq.Tests
             return GlobalSetup.CreateSession();
         }
 
+		[Test]
+		[Ignore("TODO")]
+		public void TestSumInSum()
+		{
+			var v = from f in nwnd.Customers
+					select f.Orders.Sum(x => x.OrderDetails.Sum(y => y.Quantity * y.UnitPrice));
+			v.ToList();
+		}
+
         [Test]
         public void CanGetCountOnQueryWithAnonymousType()
         {
@@ -57,6 +66,15 @@ namespace NHibernate.Linq.Tests
 
 			var list = query.ToList();
 			Assert.AreEqual(3, list.Count);
+		}
+
+		[Test]
+		[Ignore("TODO")]
+		public void CanDoChainedSelect()
+		{
+			var query = (from user in session.Linq<User>()
+			             select user.Name + user.Name).Select(x=>x.Replace("a","b")).First();
+
 		}
 
 		[Test]

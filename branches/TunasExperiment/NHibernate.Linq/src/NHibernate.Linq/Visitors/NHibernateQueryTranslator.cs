@@ -8,6 +8,7 @@ using NHibernate.Criterion;
 using NHibernate.Linq.Transform;
 using NHibernate.Linq.Util;
 using NHibernate.Linq.Expressions;
+using NHibernate.SqlCommand;
 using LinqExpression = System.Linq.Expressions.Expression;
 
 namespace NHibernate.Linq.Visitors
@@ -130,8 +131,14 @@ namespace NHibernate.Linq.Visitors
 
             var visitor = new SelectArgumentsVisitor(rootCriteria, session);
             visitor.Visit(lambda.Body);
-
-            rootCriteria.SetProjectionIfNotNull(visitor.Projection);
+			if(visitor.Projection is CollectionProjection)
+			{
+				CollectionProjection projection = visitor.Projection as CollectionProjection;
+				EntityExpression expression = projection.expression.ElementExpression;
+				rootCriteria.CreateAlias(expression.Alias, expression.Alias, JoinType.LeftOuterJoin);
+			}
+			else
+				rootCriteria.SetProjectionIfNotNull(visitor.Projection);
             rootCriteria.SetResultTransformerIfNotNull(visitor.Transformer);
         }
 

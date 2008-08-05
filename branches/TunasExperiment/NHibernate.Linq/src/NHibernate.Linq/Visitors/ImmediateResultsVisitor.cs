@@ -1,172 +1,176 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using NHibernate.Linq.Util;
 using NHibernate.Criterion;
+using NHibernate.Linq.Util;
 using LinqExpression = System.Linq.Expressions.Expression;
 
 namespace NHibernate.Linq.Visitors
 {
-    public interface IImmediateResultsVisitor
-    {
-        object GetResults(MethodCallExpression expr);
-    }
+	public interface IImmediateResultsVisitor
+	{
+		object GetResults(MethodCallExpression expr);
+	}
 
-    /// <summary>
-    /// Visits any expression calls that require immediate results.
-    /// </summary>
-    public class ImmediateResultsVisitor<T> : NHibernateExpressionVisitor, IImmediateResultsVisitor
-    {
-        private readonly ISession session;
-        private readonly ICriteria rootCriteria;
-        private T results;
+	/// <summary>
+	/// Visits any expression calls that require immediate results.
+	/// </summary>
+	public class ImmediateResultsVisitor<T> : NHibernateExpressionVisitor, IImmediateResultsVisitor
+	{
+		private readonly ICriteria rootCriteria;
+		private readonly ISession session;
+		private T results;
 
-        public ImmediateResultsVisitor(ISession session, ICriteria rootCriteria)
-        {
-            this.session = session;
-            this.rootCriteria = rootCriteria;
-        }
+		public ImmediateResultsVisitor(ISession session, ICriteria rootCriteria)
+		{
+			this.session = session;
+			this.rootCriteria = rootCriteria;
+		}
 
-        public object GetResults(MethodCallExpression expr)
-        {
-            Visit(expr);
-            return results;
-        }
+		#region IImmediateResultsVisitor Members
 
-        protected override LinqExpression VisitMethodCall(MethodCallExpression call)
-        {
-            switch (call.Method.Name)
-            {
-                case "First":
-                    results = HandleFirstCall(call);
-                    break;
-                case "FirstOrDefault":
-                    results = HandleFirstOrDefaultCall(call);
-                    break;
-                case "Single":
-                    results = HandleSingleCall(call);
-                    break;
-                case "SingleOrDefault":
-                    results = HandleSingleOrDefaultCall(call);
-                    break;
-                case "Aggregate":
-                    results = HandleAggregateCallback(call);
-                    break;
-                case "Average":
-                case "Count":
-                case "LongCount":
-                case "Max":
-                case "Min":
-                case "Sum":
-                    results = HandleAggregateCall(call);
-                    break;
-                case "Any":
-                    results = HandleAnyCall(call);
-                    break;
-                default:
-                    throw new NotImplementedException("The method " + call.Method.Name + " is not implemented.");
-            }
+		public object GetResults(MethodCallExpression expr)
+		{
+			Visit(expr);
+			return results;
+		}
 
-            return call;
-        }
+		#endregion
 
-        private T HandleFirstCall(MethodCallExpression call)
-        {
-            return GetElementList(call, 1).First();
-        }
+		protected override LinqExpression VisitMethodCall(MethodCallExpression call)
+		{
+			switch (call.Method.Name)
+			{
+				case "First":
+					results = HandleFirstCall(call);
+					break;
+				case "FirstOrDefault":
+					results = HandleFirstOrDefaultCall(call);
+					break;
+				case "Single":
+					results = HandleSingleCall(call);
+					break;
+				case "SingleOrDefault":
+					results = HandleSingleOrDefaultCall(call);
+					break;
+				case "Aggregate":
+					results = HandleAggregateCallback(call);
+					break;
+				case "Average":
+				case "Count":
+				case "LongCount":
+				case "Max":
+				case "Min":
+				case "Sum":
+					results = HandleAggregateCall(call);
+					break;
+				case "Any":
+					results = HandleAnyCall(call);
+					break;
+				default:
+					throw new NotImplementedException("The method " + call.Method.Name + " is not implemented.");
+			}
 
-        private T HandleFirstOrDefaultCall(MethodCallExpression call)
-        {
-            return GetElementList(call, 1).FirstOrDefault();
-        }
+			return call;
+		}
 
-        private T HandleSingleCall(MethodCallExpression call)
-        {
-            return GetElementList(call, 2).Single();
-        }
+		private T HandleFirstCall(MethodCallExpression call)
+		{
+			return GetElementList(call, 1).First();
+		}
 
-        private T HandleSingleOrDefaultCall(MethodCallExpression call)
-        {
-            return GetElementList(call, 2).SingleOrDefault();
-        }
+		private T HandleFirstOrDefaultCall(MethodCallExpression call)
+		{
+			return GetElementList(call, 1).FirstOrDefault();
+		}
 
-        private IList<T> GetElementList(MethodCallExpression call, int count)
-        {
-            if (call.Arguments.Count > 1)
-                rootCriteria.Add(WhereArgumentsVisitor.GetCriterion(rootCriteria, session, call.Arguments[1]));
+		private T HandleSingleCall(MethodCallExpression call)
+		{
+			return GetElementList(call, 2).Single();
+		}
 
-            return rootCriteria.SetFirstResult(0).SetMaxResults(count).List<T>();
-        }
+		private T HandleSingleOrDefaultCall(MethodCallExpression call)
+		{
+			return GetElementList(call, 2).SingleOrDefault();
+		}
 
-        private T HandleAggregateCallback(MethodCallExpression call)
-        {
-            LambdaExpression lambda = (LambdaExpression)LinqUtil.StripQuotes(call.Arguments[call.Arguments.Count - 1]);
-            System.Type resultType = lambda.Parameters[1].Type;
+		private IList<T> GetElementList(MethodCallExpression call, int count)
+		{
+			if (call.Arguments.Count > 1)
+				rootCriteria.Add(WhereArgumentsVisitor.GetCriterion(rootCriteria, session, call.Arguments[1]));
 
-            IList list = rootCriteria.List();
-            MethodInfo castMethod = typeof(Enumerable).GetMethod("Cast").MakeGenericMethod(resultType);
-            IEnumerable enumerable= (IEnumerable)castMethod.Invoke(null, new object[] { list });
+			return rootCriteria.SetFirstResult(0).SetMaxResults(count).List<T>();
+		}
 
-            if (call.Arguments.Count == 2)
-            {
-                return (T)call.Method.Invoke(null, new object[]
-                {
-                    enumerable.AsQueryable(),
-                    lambda
-                });
-            }
-            else if (call.Arguments.Count == 3)
-            {
-                return (T)call.Method.Invoke(null, new[]
-               	{
-               		enumerable.AsQueryable(),
-                    ((ConstantExpression)call.Arguments[1]).Value,
-               		lambda
-               	});
-            }
-            else if (call.Arguments.Count == 4)
-            {
-                return (T)call.Method.Invoke(null, new[]
-               	{
-               		enumerable.AsQueryable(),
-                    ((ConstantExpression)call.Arguments[1]).Value,
-               		LinqUtil.StripQuotes(call.Arguments[2]),
-                    lambda
-               	});
-            }
+		private T HandleAggregateCallback(MethodCallExpression call)
+		{
+			var lambda = (LambdaExpression) LinqUtil.StripQuotes(call.Arguments[call.Arguments.Count - 1]);
+			System.Type resultType = lambda.Parameters[1].Type;
 
-            throw new ArgumentException("Invalid number of arguments passed to the Aggregate method.");
-        }
+			IList list = rootCriteria.List();
+			MethodInfo castMethod = typeof (Enumerable).GetMethod("Cast").MakeGenericMethod(resultType);
+			var enumerable = (IEnumerable) castMethod.Invoke(null, new object[] {list});
 
-        private T HandleAggregateCall(MethodCallExpression call)
-        {
-            var visitor = new SelectArgumentsVisitor(rootCriteria, session);
-            visitor.Visit(call);
+			if (call.Arguments.Count == 2)
+			{
+				return (T) call.Method.Invoke(null, new object[]
+				                                    	{
+				                                    		enumerable.AsQueryable(),
+				                                    		lambda
+				                                    	});
+			}
+			else if (call.Arguments.Count == 3)
+			{
+				return (T) call.Method.Invoke(null, new[]
+				                                    	{
+				                                    		enumerable.AsQueryable(),
+				                                    		((ConstantExpression) call.Arguments[1]).Value,
+				                                    		lambda
+				                                    	});
+			}
+			else if (call.Arguments.Count == 4)
+			{
+				return (T) call.Method.Invoke(null, new[]
+				                                    	{
+				                                    		enumerable.AsQueryable(),
+				                                    		((ConstantExpression) call.Arguments[1]).Value,
+				                                    		LinqUtil.StripQuotes(call.Arguments[2]),
+				                                    		lambda
+				                                    	});
+			}
 
-            T value = default(T);
-            if (visitor.Projection != null)
-            {
-                object result = rootCriteria.SetProjection(visitor.Projection).UniqueResult();
-                value = (T)LinqUtil.ChangeType(result, typeof(T));
-            }
+			throw new ArgumentException("Invalid number of arguments passed to the Aggregate method.");
+		}
 
-            return value;
-        }
+		private T HandleAggregateCall(MethodCallExpression call)
+		{
+			var visitor = new SelectArgumentsVisitor(rootCriteria, session);
+			visitor.Visit(call);
 
-        private T HandleAnyCall(MethodCallExpression call)
-        {
-            rootCriteria.SetProjection(Projections.RowCount());
+			T value = default(T);
+			if (visitor.Projection != null)
+			{
+				object result = rootCriteria.SetProjection(visitor.Projection).UniqueResult();
+				value = (T) LinqUtil.ChangeType(result, typeof (T));
+			}
 
-            if (call.Arguments.Count > 1)
-                rootCriteria.Add(WhereArgumentsVisitor.GetCriterion(rootCriteria, session, call.Arguments[1]));
+			return value;
+		}
 
-            int count = (int)rootCriteria.UniqueResult();
+		private T HandleAnyCall(MethodCallExpression call)
+		{
+			rootCriteria.SetProjection(Projections.RowCount());
 
-            //HACK: the Any method always returns bool - maybe need to make this class non-generic
-            return (T)(object)(count > 0);
-        }
-    }
+			if (call.Arguments.Count > 1)
+				rootCriteria.Add(WhereArgumentsVisitor.GetCriterion(rootCriteria, session, call.Arguments[1]));
+
+			var count = (int) rootCriteria.UniqueResult();
+
+			//HACK: the Any method always returns bool - maybe need to make this class non-generic
+			return (T) (object) (count > 0);
+		}
+	}
 }

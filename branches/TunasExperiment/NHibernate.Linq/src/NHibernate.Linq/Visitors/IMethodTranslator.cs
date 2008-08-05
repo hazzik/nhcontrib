@@ -10,6 +10,6 @@ namespace NHibernate.Linq.Visitors
 	public interface IMethodTranslator
 	{
 		void Initialize(ISession session, ICriteria rootCriteria);
-		IProjection GetProjection(MethodCallExpression expression);
+		ProjectionWithImplication GetProjection(MethodCallExpression expression);
 	}
 }

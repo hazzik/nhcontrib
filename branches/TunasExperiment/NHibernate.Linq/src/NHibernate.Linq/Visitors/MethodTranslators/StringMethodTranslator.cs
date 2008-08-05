@@ -30,7 +30,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 
 
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
 			switch (expression.Method.Name)
 			{
@@ -48,6 +48,8 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 					return GetToUpperProjection(expression);
 				case "IndexOf":
 					return GetIndexOfProjection(expression);
+				case "Substring":
+					return GetSubstringProjection(expression);
 				default:
 					throw new NotImplementedException(expression.Method.Name);
 					break;
@@ -57,7 +59,41 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 
 
 		#endregion
-		protected virtual IProjection GetIndexOfProjection(MethodCallExpression expr)
+
+		protected virtual ProjectionWithImplication GetSubstringProjection(MethodCallExpression expr)
+		{
+			var function = new StandardSQLFunction("substring");
+
+			var source = expr.Object;
+
+			var projections = new IProjection[expr.Arguments.Count + 1];
+
+			var objVisitor = new SelectArgumentsVisitor(this.criteria, this.session);
+			objVisitor.Visit(source);
+			projections[0] = objVisitor.Projection;
+
+			var p0 = expr.Arguments[0];
+			var p0Visitor = new SelectArgumentsVisitor(this.criteria, this.session);
+			p0Visitor.Visit(p0);
+			projections[1] = Projections.SqlFunction(SelectArgumentsVisitor.arithmaticAddition,
+			                                         NHibernateUtil.GuessType(p0.Type), p0Visitor.Projection,
+			                                         Projections.Constant(1));
+			if (expr.Arguments.Count > 1)
+			{
+				var p1 = expr.Arguments[1];
+				var p1Visitor = new SelectArgumentsVisitor(this.criteria, this.session);
+				p1Visitor.Visit(p1);
+				projections[2] = p1Visitor.Projection;
+			}
+			else
+			{
+				projections[2] = Projections.Constant(Int32.MaxValue);
+			}
+
+			return new ProjectionWithImplication(Projections.SqlFunction(function, NHibernateUtil.Int32, projections));
+		}
+
+		protected virtual ProjectionWithImplication GetIndexOfProjection(MethodCallExpression expr)
 		{
 			var function = new StandardSQLFunction("charindex");
 			var obj = expr.Object;
@@ -77,46 +113,39 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 				var p1 = expr.Arguments[1];
 				var p1Visitor = new SelectArgumentsVisitor(this.criteria, this.session);
 				p1Visitor.Visit(p1);
-				projections[2] = p1Visitor.Projection;
+				projections[2] = Projections.SqlFunction(SelectArgumentsVisitor.arithmaticAddition,
+				                                         NHibernateUtil.GuessType(p1.Type),
+				                                         p1Visitor.Projection,
+				                                         Projections.Constant(1));
 			}
-			return Projections.SqlFunction(function, NHibernateUtil.Int32,projections);
-		}
-		protected virtual IProjection GetToUpperProjection(MethodCallExpression expr)
-		{
-			var obj = expr.Object;
-			var visitor = new SelectArgumentsVisitor(this.criteria, this.session);
-			visitor.Visit(obj);
-			var function = new StandardSQLFunction("upper");
-			return Projections.SqlFunction(function,NHibernateUtil.String, visitor.Projection);
 
+			return new ProjectionWithImplication(Projections.SqlFunction(function, NHibernateUtil.Int32,projections));
 		}
-		protected virtual IProjection GetReplaceProjection(MethodCallExpression expr)
+		protected virtual ProjectionWithImplication GetToUpperProjection(MethodCallExpression expr)
+		{
+			var translator = new DBFunctionMethodTranslator();
+			translator.Initialize(this.session, this.criteria);
+			return translator.GetProjection("upper",expr.Type,expr.Object);
+		}
+		protected virtual ProjectionWithImplication GetReplaceProjection(MethodCallExpression expr)
 		{
 			var function = new StandardSQLFunction("replace");
-			var obj = expr.Object;
+			var source = expr.Object;
 			var p0 = expr.Arguments[0];
 			var p1 = expr.Arguments[1];
-			var objVisitor = new SelectArgumentsVisitor(this.criteria, this.session);
-			var p0Visitor = new SelectArgumentsVisitor(this.criteria, this.session);
-			var p1Visitor = new SelectArgumentsVisitor(this.criteria, this.session);
-			p0Visitor.Visit(p0);
-			p1Visitor.Visit(p1);
-			objVisitor.Visit(obj);
 
-			return Projections.SqlFunction(function,NHibernateUtil.String,
-			                               objVisitor.Projection,
-			                               p0Visitor.Projection,
-			                               p1Visitor.Projection
-				);
+			var translator = new DBFunctionMethodTranslator();
+			translator.Initialize(this.session, this.criteria);
+			return translator.GetProjection("replace", expr.Type, source, p0, p1);
 		}
-		protected virtual IProjection GetLikeCriterion(MethodCallExpression expr, MatchMode matchMode)
+		protected virtual ProjectionWithImplication GetLikeCriterion(MethodCallExpression expr, MatchMode matchMode)
 		{
 			var criterion= Restrictions.Like(MemberNameVisitor.GetMemberName(this.criteria, expr.Object),
 			                                 String.Format("{0}", QueryUtil.GetExpressionValue(expr.Arguments[0])),
 			                                 matchMode);
-			return Projections.Conditional(criterion,
+			return new ProjectionWithImplication(Projections.Conditional(criterion,
 			                               Projections.Constant(true), 
-			                               Projections.Constant(false));
+			                               Projections.Constant(false)));
 		}
 	}
 }
