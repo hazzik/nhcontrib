@@ -64,6 +64,8 @@ namespace Northwind.Entities
 		public virtual IList EmployeeTerritories { get; set; }
 
 		public virtual IList Orders { get; set; }
+
+		public virtual Employee ReportsTo { get; set; }
 	}
 
 	[Serializable]

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text;
 using NHibernate.Linq.Visitors;
-using NHibernate.Linq.Visitors.MethodTranslators;
 using NUnit.Framework;
 using NHibernate.Linq.SqlClient;
 using System.Linq;
+using NHibernate.Linq.Visitors.MethodTranslators;
 
 namespace NHibernate.Linq.Tests
 {

@@ -32,7 +32,7 @@ namespace NHibernate.Linq.Visitors
         {
         	var translator = MethodTranslatorRegistry.Current.GetTranslatorInstanceForMethod(expr.Method);
 			translator.Initialize(session,rootCriteria);
-        	this.Projection = translator.GetProjection(expr);
+        	this.Projection = translator.GetProjection(expr).Projections;
             return expr;
         }
 

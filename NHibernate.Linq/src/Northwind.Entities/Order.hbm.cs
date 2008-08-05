@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace Northwind.Entities
 {
@@ -49,7 +50,7 @@ namespace Northwind.Entities
 
 		public virtual Employee Employee { get; set; }
 
-		public virtual IList OrderDetails { get; set; }
+		public virtual IList<OrderDetail> OrderDetails { get; set; }
 
 		public virtual Shipper Shipper { get; set; }
 	}

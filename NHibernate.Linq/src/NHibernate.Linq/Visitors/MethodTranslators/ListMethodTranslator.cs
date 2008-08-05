@@ -7,7 +7,7 @@ using System.Text;
 using NHibernate.Criterion;
 using NHibernate.Linq.Expressions;
 using NHibernate.Linq.Util;
-using NHibernate.Linq.Visitors.MethodTranslators;
+
 
 namespace NHibernate.Linq.Visitors.MethodTranslators
 {
@@ -24,7 +24,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		private ISession session;
 		private ICriteria rootCriteria;
 
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
 			switch (expression.Method.Name)
 			{
@@ -35,14 +35,14 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			}
 
 		}
-		protected virtual IProjection GetContainsProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjection(MethodCallExpression expression)
 		{
 			if (expression.Object is ConstantExpression)
 				return GetContainsProjectionWithConstantSource(expression);
 			else
 				return GetContainsProjectionWithAssociationSource(expression);
 		}
-		protected virtual IProjection GetContainsProjectionWithConstantSource(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjectionWithConstantSource(MethodCallExpression expression)
 		{
 			var source = expression.Object;
 			var items = expression.Arguments[0];
@@ -50,15 +50,15 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			{
 				var values = QueryUtil.GetExpressionValue(source) as ICollection;
 				return
-					Projections.Conditional(
+					new ProjectionWithImplication(Projections.Conditional(
 						Restrictions.In(MemberNameVisitor.GetMemberName(this.rootCriteria, items),
-										values), Projections.Constant(true), Projections.Constant(false));
+										values), Projections.Constant(true), Projections.Constant(false)));
 			}
 			throw new InvalidOperationException("Invalid operation at EnumerableMethodTranslator");
 		}
-		protected virtual IProjection GetContainsProjectionWithAssociationSource(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjectionWithAssociationSource(MethodCallExpression expression)
 		{
-	throw new NotImplementedException();
+			throw new NotImplementedException();
 		}
 		#endregion
 	}

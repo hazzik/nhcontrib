@@ -28,13 +28,13 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		private ISession session;
 
 		
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
 			return GetProjectionInternal(expression);
 		}
 
 
-		protected virtual IProjection GetProjectionInternal(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetProjectionInternal(MethodCallExpression expression)
 		{
 			switch (expression.Method.Name)
 			{
@@ -57,8 +57,7 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 					throw new MethodNotSupportedException(expression.Method);
 			}
 		}
-
-		protected virtual IProjection GetAnyProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetAnyProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
@@ -84,9 +83,10 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			}
 			string identifierName = rootEntity.MetaData.IdentifierPropertyName;
 			var criterion = Subqueries.PropertyIn(identifierName, query);
-			return Projections.Conditional(criterion, Projections.Constant(true), Projections.Constant(false));
+			var projection = Projections.Conditional(criterion, Projections.Constant(true), Projections.Constant(false));
+			return new ProjectionWithImplication(projection);
 		}
-		protected virtual IProjection GetAverageProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetAverageProjection(MethodCallExpression expression)
 		{
 			if (!(expression.Arguments.Count>1) )
 				throw new InvalidOperationException();
@@ -100,10 +100,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			visitor.Visit(lambda);
 			detached.SetProjection(Projections.Avg(visitor.Projection));
 			var subQueryProjection = Projections.SubQuery(detached);
-			return subQueryProjection;
+			return new ProjectionWithImplication(subQueryProjection);
 		}
-
-		protected virtual IProjection GetMaxProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetMaxProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
@@ -117,9 +116,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 				detached.SetProjection(Projections.Max(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
-			return subQueryProjection;
+			return new ProjectionWithImplication(subQueryProjection);
 		}
-		protected virtual IProjection GetMinProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetMinProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
@@ -133,9 +132,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 				detached.SetProjection(Projections.Min(visitor.Projection));
 			}
 			var subQueryProjection = Projections.SubQuery(detached);
-			return subQueryProjection;
+			return new ProjectionWithImplication(subQueryProjection);
 		}
-		protected virtual IProjection GetSumProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetSumProjection(MethodCallExpression expression)
 		{
 			if (!(expression.Arguments.Count > 1))
 				throw new InvalidOperationException();
@@ -149,10 +148,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			detached.SetProjection(Projections.Sum(visitor.Projection));
 
 			var subQueryProjection = Projections.SubQuery(detached);
-			return subQueryProjection;
+			return new ProjectionWithImplication(subQueryProjection);
 		}
-
-		protected virtual IProjection GetCountProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetCountProjection(MethodCallExpression expression)
 		{
 			var detached = GetAssociatedDetachedCriteria(expression);
 			var collection = expression.Arguments[0] as CollectionAccessExpression;
@@ -169,9 +167,10 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			var type = collection.ElementExpression.Type;
 			string identifierName = this.session.SessionFactory.GetClassMetadata(type).IdentifierPropertyName;
 			detached.SetProjection(Projections.Count(string.Format("{0}.{1}", alias, identifierName)));
-			return Projections.SubQuery(detached);
+			var projection = new ProjectionWithImplication(Projections.SubQuery(detached));
+			return projection;
 		}
-		protected virtual IProjection GetContainsProjection(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjection(MethodCallExpression expression)
 		{
 			var source = expression.Arguments[0];
 			var items = expression.Arguments[1];
@@ -182,18 +181,16 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			throw new InvalidOperationException("Invalid operation at EnumerableMethodTranslator");
 
 		}
-		protected virtual IProjection GetContainsProjectionWithConstantLeft(MethodCallExpression expression)
+		protected virtual ProjectionWithImplication GetContainsProjectionWithConstantLeft(MethodCallExpression expression)
 		{
 			var source = expression.Arguments[0];
 			var items = expression.Arguments[1];
 			var values = QueryUtil.GetExpressionValue(source) as ICollection;
-			return
-				Projections.Conditional(
-					Restrictions.In(MemberNameVisitor.GetMemberName(this.criteria, items),
-									values), Projections.Constant(true), Projections.Constant(false));
+			var projection = Projections.Conditional(
+				Restrictions.In(MemberNameVisitor.GetMemberName(this.criteria, items),
+				                values), Projections.Constant(true), Projections.Constant(false));
+			return new ProjectionWithImplication(projection);
 		}
-
-
 		protected virtual DetachedCriteria GetAssociatedDetachedCriteria(MethodCallExpression expression)
 		{
 			EntityExpression rootEntity = EntityExpressionVisitor.RootEntity(expression);
@@ -206,12 +203,11 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 				);
 			return criteria; 
 		}	
-		private string GetMemberName(MethodCallExpression expression)
-		{
+		//private string GetMemberName(MethodCallExpression expression)
+		//{
 
-			var name = MemberNameVisitor.GetMemberName(this.criteria, expression.Arguments[1]);
-			return name;
-		}
-
+		//    var name = MemberNameVisitor.GetMemberName(this.criteria, expression.Arguments[1]);
+		//    return name;
+		//}
 	}
 }

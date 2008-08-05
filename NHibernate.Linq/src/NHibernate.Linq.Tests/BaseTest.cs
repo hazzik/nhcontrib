@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using NHibernate.Linq.SqlClient;
 using NHibernate.Linq.Visitors;
-using NHibernate.Linq.Visitors.MethodTranslators;
 using NUnit.Framework;
 using NHibernate.Linq.Tests.Entities;
 

@@ -6,6 +6,7 @@ using System.Text;
 using NHibernate.Criterion;
 using NHibernate.Dialect.Function;
 using NHibernate.Linq.Expressions;
+using NHibernate.Type;
 
 namespace NHibernate.Linq.Visitors.MethodTranslators
 {
@@ -22,9 +23,9 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 		private ISession session;
 		private ICriteria rootCriteria;
 		//TODO: Use property position
-		public IProjection GetProjection(MethodCallExpression expression)
+		public ProjectionWithImplication GetProjection(MethodCallExpression expression)
 		{
-			var attributes = expression.Method.GetCustomAttributes(typeof (SqlFunctionAttribute),true);
+			var attributes = expression.Method.GetCustomAttributes(typeof (SqlFunctionAttribute), true);
 			int propertyPosition = 0;
 			string functionName;
 			if (attributes != null && attributes.Length > 0)
@@ -36,20 +37,30 @@ namespace NHibernate.Linq.Visitors.MethodTranslators
 			else
 				functionName = expression.Method.Name;
 
-			var sqlfunction = new StandardSQLFunction(functionName);
-
-			var projections = new IProjection[expression.Arguments.Count];
-			for (int i = 0; i < expression.Arguments.Count; i++)
-			{
-				
-				var visitor = new SelectArgumentsVisitor(rootCriteria, this.session);
-				visitor.Visit(expression.Arguments[i]);
-				projections[i] = visitor.Projection;
-			}
-			var returnType = NHibernateUtil.GuessType(expression.Method.ReturnType);
-			return Projections.SqlFunction(sqlfunction, returnType , projections);
+			return GetProjection(functionName, expression.Method.ReturnType, expression.Arguments.ToArray());
 		}
 
+		/// <summary>
+		/// Provided in order to prevent code duplication in type specific method interpretation.
+		/// </summary>
+		/// <param name="functionName"></param>
+		/// <param name="rerturntype"></param>
+		/// <param name="arguments"></param>
+		/// <returns></returns>
+		public ProjectionWithImplication GetProjection(string functionName, System.Type returnType, params System.Linq.Expressions.Expression[] arguments)
+		{
+			var sqlfunction = new StandardSQLFunction(functionName);
+			var projections = new IProjection[arguments.Length];
+			for (int i = 0; i < arguments.Length; i++)
+			{
+
+				var visitor = new SelectArgumentsVisitor(rootCriteria, this.session);
+				visitor.Visit(arguments[i]);
+				projections[i] = visitor.Projection;
+			}
+			var type = NHibernateUtil.GuessType(returnType);
+			return new ProjectionWithImplication(Projections.SqlFunction(sqlfunction, type, projections));
+		}
 		#endregion
 	}
 }
