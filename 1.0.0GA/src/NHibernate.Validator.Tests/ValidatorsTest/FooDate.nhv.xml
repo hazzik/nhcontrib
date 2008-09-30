@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nhv-mapping xmlns="urn:nhibernate-validator-1.0"
+			 namespace="NHibernate.Validator.Tests.ValidatorsTest"
+			 assembly="NHibernate.Validator.Tests">
+	<class name="FooDate">
+		<property name="Future">
+			<future />
+		</property>
+
+		<property name="Past">
+			<past />
+		</property>
+	</class>
+</nhv-mapping>
