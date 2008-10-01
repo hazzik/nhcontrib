@@ -1,1 +1,0 @@
-<%@ Application Inherits="EnterpriseSample.Web.CustomHttpApplication" Language="C#" %>
