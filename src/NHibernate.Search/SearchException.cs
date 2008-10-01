@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace NHibernate.Search.Impl {
+namespace NHibernate.Search
+{
     [Serializable]
     public class SearchException : Exception {
         //

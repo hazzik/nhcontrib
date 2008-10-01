@@ -16,22 +16,17 @@ namespace NHibernate.Search.Bridge
             this.stringBridge = stringBridge;
         }
 
-        #region IFieldBridge Members
-
-        public void Set(String name, Object value, Document document, Field.Store store, Field.Index index, float? boost)
+        public void Set(string name, object value, Document document, LuceneOptions luceneOptions)
         {
             String indexedString = stringBridge.ObjectToString(value);
             //Do not add fields on empty strings, seems a sensible default in most situations
             //TODO if Store, probably also save empty ones
             if (StringHelper.IsNotEmpty(indexedString))
             {
-                Field field = new Field(name, indexedString, store, index);
-                if (boost != null)
-                    field.SetBoost(boost.Value);
+                Field field = new Field(name, indexedString, luceneOptions.Store, luceneOptions.Index);
+                field.SetBoost(luceneOptions.Boost);
                 document.Add(field);
             }
         }
-
-        #endregion
     }
 }

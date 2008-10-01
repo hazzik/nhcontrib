@@ -23,22 +23,23 @@ namespace NHibernate.Search.Filter
         }
 
         /// <summary>
-        /// 
+        /// Serves as a hash function for a particular type.
         /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException("Must override GetHashCode");
-        }
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// </returns>
+        public abstract override int GetHashCode();
 
         /// <summary>
-        /// 
+        /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public override bool Equals(object obj)
-        {
-            throw new NotImplementedException("Must override Equals");
-        }
+        /// <param name="obj">The <see cref="T:System.Object"/> to compare with the current <see cref="T:System.Object"/>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>; otherwise, false.
+        /// </returns>
+        /// <exception cref="T:System.NullReferenceException">
+        /// The <paramref name="obj"/> parameter is null.
+        /// </exception>
+        public abstract override bool Equals(object obj);
     }
 }

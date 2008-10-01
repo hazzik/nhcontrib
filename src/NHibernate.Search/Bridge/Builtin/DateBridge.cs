@@ -29,7 +29,7 @@ namespace NHibernate.Search.Bridge.Builtin
 
         #region IParameterizedBridge Members
 
-        public void SetParameterValues(Dictionary<string, object> parameters)
+        public void SetParameterValues(IDictionary<string, object> parameters)
         {
             object res = parameters["resolution"];
             Resolution hibResolution;

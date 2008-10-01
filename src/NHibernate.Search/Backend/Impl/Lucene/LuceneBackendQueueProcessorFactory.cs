@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using NHibernate.Search.Engine;
 using NHibernate.Search.Impl;
 
 namespace NHibernate.Search.Backend.Impl.Lucene
 {
     public class LuceneBackendQueueProcessorFactory : IBackendQueueProcessorFactory
     {
-        private SearchFactoryImpl searchFactory;
+        private ISearchFactoryImplementor searchFactory;
 
         #region IBackendQueueProcessorFactory Members
 
-        public void Initialize(IDictionary props, SearchFactoryImpl aSearchFactory)
+        public void Initialize(IDictionary props, ISearchFactoryImplementor aSearchFactory)
         {
             this.searchFactory = aSearchFactory;
         }

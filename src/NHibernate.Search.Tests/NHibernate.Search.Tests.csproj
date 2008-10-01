@@ -106,6 +106,7 @@
     <Compile Include="Session\MassIndexTest.cs" />
     <Compile Include="TestCase.cs" />
     <Compile Include="TestConfigurationHelper.cs" />
+    <Compile Include="ValidateNamingConventions.cs" />
     <Compile Include="Worker\AsyncWorkerTest.cs" />
     <Compile Include="Worker\ConcurrencyTest.cs" />
     <Compile Include="Worker\Drink.cs" />

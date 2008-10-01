@@ -7,28 +7,12 @@ namespace NHibernate.Search.Engine
 {
     public class QueryLoader : ILoader
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(QueryLoader));
-        private static readonly IList EMPTY_LIST = new ArrayList();
-        private const int MAX_IN_CLAUSE = 500;
 
-        private ISearchFactoryImplementor searchFactoryImplementor;
         private ISession session;
         private System.Type entityType;
+        private ISearchFactoryImplementor searchFactoryImplementor;
         private ICriteria criteria;
-
-        public System.Type EntityType
-        {
-            get { return entityType; }
-            set { entityType = value; }
-        }
-
-        public ICriteria Criteria
-        {
-            get { return criteria; }
-            set { criteria = value; }
-        }
-
-        #region ILoader Members
+        private bool isExplicitCriteria;
 
         public void Init(ISession session, ISearchFactoryImplementor searchFactoryImplementor)
         {
@@ -36,59 +20,33 @@ namespace NHibernate.Search.Engine
             this.searchFactoryImplementor = searchFactoryImplementor;
         }
 
-        public object Load(EntityInfo entityInfo)
+        public void SetEntityType(System.Type entityType)
         {
-            object maybeProxy = session.Get(entityInfo.Clazz, entityInfo.Id);
-            // TODO: Initialize call and error trapping
+            this.entityType = entityType;
+        }
 
-            return maybeProxy;
+        public Object Load(EntityInfo entityInfo)
+        {
+            //if explicit criteria, make sure to use it to load the objects
+            if (isExplicitCriteria) 
+                Load(new EntityInfo[] { entityInfo });
+            return ObjectLoaderHelper.Load(entityInfo, session);
         }
 
         public IList Load(params EntityInfo[] entityInfos)
         {
-            int maxResults = entityInfos.Length;
-            if (maxResults == 0) return EMPTY_LIST;
-            if (entityType == null) throw new NotSupportedException("EntityType not defined");
+            if (entityInfos.Length == 0) return new object[0];
+            if (entityType == null) throw new AssertionFailure("EntityType not defined");
             if (criteria == null) criteria = session.CreateCriteria(entityType);
 
-            DocumentBuilder builder = searchFactoryImplementor.DocumentBuilders[entityType];
-            string idName = "?"; // builder.IdentifierName;
-            int loop = maxResults/MAX_IN_CLAUSE;
-            bool exact = maxResults % MAX_IN_CLAUSE == 0;
-            if (!exact) loop++;
-
-            Disjunction disjunction = Restrictions.Disjunction();
-            for (int index = 0; index < loop; index++)
-            {
-                int max = index * MAX_IN_CLAUSE + MAX_IN_CLAUSE <= maxResults ?
-					index * MAX_IN_CLAUSE + MAX_IN_CLAUSE :
-					maxResults;
-                IList ids = new ArrayList(max - index*MAX_IN_CLAUSE);
-                for (int entityInfoIndex = index * MAX_IN_CLAUSE; entityInfoIndex < max; entityInfoIndex++)
-                {
-                    ids.Add(entityInfos[entityInfoIndex].Id);
-                }
-                disjunction.Add(Restrictions.In(idName, ids));
-            }
-            criteria.Add(disjunction);
-            criteria.List(); // Load all objects
-
-            // Mandatory to keep the same ordering
-            IList result = new ArrayList(entityInfos.Length);
-            foreach (EntityInfo entityInfo in entityInfos)
-            {
-                object element = session.Load(entityInfo.Clazz, entityInfo.Id);
-                if (NHibernateUtil.IsInitialized(element))
-                {
-                    //all existing elements should have been loaded by the query,
-                    //the other ones are missing ones
-                    result.Add(element);
-                }
-            }
-
-            return result;
+            ObjectLoaderHelper.InitializeObjects(entityInfos, criteria, entityType, searchFactoryImplementor);
+            return ObjectLoaderHelper.ReturnAlreadyLoadedObjectsInCorrectOrder(entityInfos, session);
         }
 
-        #endregion
+        public void SetCriteria(ICriteria criteria)
+        {
+            isExplicitCriteria = criteria != null;
+            this.criteria = criteria;
+        }
     }
 }

@@ -2,29 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using NHibernate.Search.Attributes;
 
 namespace NHibernate.Search.Engine
 {
-    public delegate void Method();
-
+    /// <summary>
+    /// A wrapper class which encapsualtes all required information to create a defined filter
+    /// </summary>
     public class FilterDef
     {
         private System.Type impl;
         private MethodInfo factoryMethod;
         private MethodInfo keyMethod;
-        private Dictionary<string, Method> setters;
-        private bool cache;
+        private readonly Dictionary<string, MethodInfo> setters = new Dictionary<string, MethodInfo>();
+        private FilterCacheModeType cacheMode=FilterCacheModeType.None;
+        private readonly string name;
 
-        public FilterDef()
+        public FilterDef(FullTextFilterDefAttribute def)
         {
-            setters = new Dictionary<string, Method>();
+            name = def.Name;
+            impl = def.Impl;
+            cacheMode = def.CacheMode;
         }
 
         #region Property methods
 
+        public string Name
+        {
+            get { return name; }
+        }
+
         /// <summary>
-        /// 
+        /// Gets or sets the key method.
         /// </summary>
+        /// <value>The key method.</value>
         public MethodInfo KeyMethod
         {
             get { return keyMethod; }
@@ -32,8 +43,9 @@ namespace NHibernate.Search.Engine
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the factory method.
         /// </summary>
+        /// <value>The factory method.</value>
         public MethodInfo FactoryMethod
         {
             get { return factoryMethod; }
@@ -41,8 +53,9 @@ namespace NHibernate.Search.Engine
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the impl.
         /// </summary>
+        /// <value>The impl.</value>
         public System.Type Impl
         {
             get { return impl; }
@@ -50,12 +63,13 @@ namespace NHibernate.Search.Engine
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets a value indicating whether this <see cref="FilterDef"/> is cache.
         /// </summary>
-        public bool Cache
+        /// <value><c>true</c> if cache; otherwise, <c>false</c>.</value>
+        public FilterCacheModeType CacheMode
         {
-            get { return cache; }
-            set { cache = value; }
+            get { return cacheMode; }
+            set { cacheMode = value; }
         }
 
         #endregion
@@ -64,19 +78,19 @@ namespace NHibernate.Search.Engine
 
         public void Invoke(string parameterName, object filter, object parameterValue)
         {
-            Method method = setters[parameterName];
+            MethodInfo method = setters[parameterName];
             if (method == null)
-                throw new NotSupportedException(
+            {   throw new NotSupportedException(
                     string.Format(CultureInfo.InvariantCulture, "No setter {0} found in {1}", parameterName,
                                   impl != null ? impl.Name : "<impl>"));
+            }
 
-            throw new NotImplementedException("Method not implemented");
-            //method.Invoke(filter, parameterValue);
+            method.Invoke(filter, new object[] { parameterValue });
         }
 
-        public void AddSetter(string name, Method method)
+        public void AddSetter(string name, MethodInfo method)
         {
-            throw new NotImplementedException("Method not implemented");
+            setters.Add(name, method);
         }
 
         #endregion

@@ -24,7 +24,7 @@ namespace NHibernate.Search.Tests.Inheritance
         [Test]
         public void Inheritance()
         {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Animal a = new Animal();
             a.Name = ("Shark Jr");

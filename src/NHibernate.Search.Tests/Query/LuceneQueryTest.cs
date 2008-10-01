@@ -23,7 +23,7 @@ namespace NHibernate.Search.Tests.Queries {
             ISession sess = OpenSession();
             Assert.AreEqual(0, sess.CreateCriteria(typeof (Clock)).List().Count);
 
-            IFullTextSession s = Search.CreateFullTextSession(sess);
+            IFullTextSession s = Search.GetFullTextSession(sess);
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);
@@ -68,7 +68,7 @@ namespace NHibernate.Search.Tests.Queries {
 
         [Test]
         public void Iterator() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);
@@ -115,7 +115,7 @@ namespace NHibernate.Search.Tests.Queries {
 
         [Test]
         public void List() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);
@@ -166,7 +166,7 @@ namespace NHibernate.Search.Tests.Queries {
 
         [Test]
         public void MultipleEntityPerIndex() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);
@@ -216,7 +216,7 @@ namespace NHibernate.Search.Tests.Queries {
 
         [Test]
         public void ResultSize() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);
@@ -263,7 +263,7 @@ namespace NHibernate.Search.Tests.Queries {
 
         [Test]
         public void UsingCriteriaApi() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             Clock clock = new Clock(1, "Seiko");
             s.Save(clock);

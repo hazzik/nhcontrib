@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using log4net;
 using NHibernate.Search.Engine;
 using NHibernate.Search.Store;
 
@@ -11,6 +12,7 @@ namespace NHibernate.Search.Backend.Impl.Lucene
     {
         private readonly IList<LuceneWork> queue;
         private readonly ISearchFactoryImplementor searchFactoryImplementor;
+        private readonly ILog log = LogManager.GetLogger(typeof (LuceneBackendQueueProcessor));
 
         public LuceneBackendQueueProcessor(IList<LuceneWork> queue, ISearchFactoryImplementor searchFactoryImplementor)
         {
@@ -60,6 +62,7 @@ namespace NHibernate.Search.Backend.Impl.Lucene
                 // if there is at least a single batch index job we put the work space into batch indexing mode.
                 if (!luceneWork.IsBatch) 
                     continue;
+                log.Debug("Setting batch indexing mode.");
                 workspace.IsBatch = true;
                 break;
             }

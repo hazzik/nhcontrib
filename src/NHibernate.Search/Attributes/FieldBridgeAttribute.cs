@@ -7,7 +7,7 @@ namespace NHibernate.Search.Attributes
     /// Specifies a given field bridge implementation
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class FieldBridgeAttribute : Attribute
+    public class FieldBridgeAttribute : Attribute, IBridgeAttribute
     {
         private readonly System.Type impl;
         private readonly Dictionary<string, object> parameters;
@@ -23,7 +23,7 @@ namespace NHibernate.Search.Attributes
             get { return impl; }
         }
 
-        public Dictionary<string, object> Parameters
+        public IDictionary<string, object> Parameters
         {
             get { return parameters; }
         }

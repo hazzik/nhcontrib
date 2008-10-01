@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NHibernate.Cfg;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Util;
 
 namespace NHibernate.Search.Reader

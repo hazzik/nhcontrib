@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using Iesi.Collections.Generic;
+using log4net;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using NHibernate.Cfg;
 using NHibernate.Engine;
+using NHibernate.Event;
 using NHibernate.Mapping;
 using NHibernate.Search.Attributes;
 using NHibernate.Search.Backend;
+using NHibernate.Search.Backend.Configuration;
+using NHibernate.Search.Backend.Impl;
 using NHibernate.Search.Cfg;
 using NHibernate.Search.Engine;
 using NHibernate.Search.Filter;
@@ -22,17 +26,19 @@ namespace NHibernate.Search.Impl
 {
     public class SearchFactoryImpl : ISearchFactoryImplementor
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(SearchFactoryImpl));
         private static readonly object searchFactoryKey = new object();
 
         //it's now a <Configuration, SearchFactory> map
-        [ThreadStatic] private static WeakHashtable contexts;
+        [ThreadStatic]
+        private static WeakHashtable contexts;
 
         private readonly Dictionary<System.Type, DocumentBuilder> documentBuilders =
             new Dictionary<System.Type, DocumentBuilder>();
 
         // Keep track of the index modifiers per DirectoryProvider since multiple entity can use the same directory provider
-        private readonly Dictionary<IDirectoryProvider, object> lockableDirectoryProviders =
-            new Dictionary<IDirectoryProvider, object>();
+        private readonly Dictionary<IDirectoryProvider, DirectoryProviderData> dirProviderData =
+            new Dictionary<IDirectoryProvider, DirectoryProviderData>();
 
         private readonly Dictionary<IDirectoryProvider, IOptimizerStrategy> dirProviderOptimizerStrategy =
             new Dictionary<IDirectoryProvider, IOptimizerStrategy>();
@@ -41,7 +47,11 @@ namespace NHibernate.Search.Impl
         private readonly IReaderProvider readerProvider;
         private IBackendQueueProcessorFactory backendQueueProcessorFactory;
         private readonly Dictionary<string, FilterDef> filterDefinitions = new Dictionary<string, FilterDef>();
+        private IDictionary<string, Analyzer> analyzers;
         private IFilterCachingStrategy filterCachingStrategy;
+
+        // 1 for true, 0 for false
+        private int stopped = 0;
 
         /*
          * Each directory provider (index) can have its own performance settings
@@ -50,26 +60,59 @@ namespace NHibernate.Search.Impl
         private readonly Dictionary<IDirectoryProvider, LuceneIndexingParameters> dirProviderIndexingParams =
             new Dictionary<IDirectoryProvider, LuceneIndexingParameters>();
 
+        private string indexingStrategy = "event";
+        private int cacheBitResultsSize;
+
+        public int FilterCacheBitResultsSize
+        {
+            get { return cacheBitResultsSize; }
+        }
+
         #region Constructors
 
         private SearchFactoryImpl(Configuration cfg)
         {
-            CfgHelper.Configure(cfg);
+            INHSConfiguration configure = CfgHelper.Configure(cfg);
+
+            this.indexingStrategy = DefineIndexingStrategy(configure);
 
             Analyzer analyzer = InitAnalyzer(cfg);
-            InitDocumentBuilders(cfg, analyzer);
+            InitDocumentBuilders(configure, cfg, analyzer);
 
             ISet<System.Type> classes = new HashedSet<System.Type>(documentBuilders.Keys);
             foreach (DocumentBuilder documentBuilder in documentBuilders.Values)
                 documentBuilder.PostInitialize(classes);
-            worker = WorkerFactory.CreateWorker(cfg, this);
+            worker = WorkerFactory.CreateWorker(configure, this);
             readerProvider = ReaderProviderFactory.CreateReaderProvider(cfg, this);
             BuildFilterCachingStrategy(cfg.Properties);
+            this.filterCachingStrategy = BuildFilterCachingStrategy(cfg.Properties);
+            this.cacheBitResultsSize = ConfigurationParseHelper.GetIntValue(cfg.Properties, Environment.CacheBitResultSize,
+                CachingWrapperFilter.DEFAULT_SIZE);
+
+        }
+
+        private static String DefineIndexingStrategy(INHSConfiguration cfg)
+        {
+            String indexingStrategy;
+            if (cfg.Properties.TryGetValue(Environment.IndexingStrategy, out indexingStrategy) == false)
+                indexingStrategy = "event";
+
+            if (!("event".Equals(indexingStrategy, StringComparison.InvariantCultureIgnoreCase) ||
+                "manual".Equals(indexingStrategy, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new SearchException(Environment.IndexingStrategy + " unknown: " + indexingStrategy);
+            }
+            return indexingStrategy;
         }
 
         #endregion
 
         #region Property methods
+
+        public string IndexingStrategy
+        {
+            get { return indexingStrategy; }
+        }
 
         public IBackendQueueProcessorFactory BackendQueueProcessorFactory
         {
@@ -77,9 +120,17 @@ namespace NHibernate.Search.Impl
             set { backendQueueProcessorFactory = value; }
         }
 
-        public Dictionary<System.Type, DocumentBuilder> DocumentBuilders
+        public IDictionary<System.Type, DocumentBuilder> DocumentBuilders
         {
             get { return documentBuilders; }
+        }
+
+        public ISet<System.Type> GetClassesInDirectoryProvider(IDirectoryProvider directoryProvider)
+        {
+            DirectoryProviderData value;
+            if (dirProviderData.TryGetValue(directoryProvider, out value) == false)
+                return new HashedSet<System.Type>();
+            return (ISet<System.Type>)value.classes.Clone();
         }
 
         public IFilterCachingStrategy FilterCachingStrategy
@@ -128,7 +179,7 @@ namespace NHibernate.Search.Impl
             Analyzer defaultAnalyzer;
             try
             {
-                defaultAnalyzer = (Analyzer) Activator.CreateInstance(analyzerClass);
+                defaultAnalyzer = (Analyzer)Activator.CreateInstance(analyzerClass);
             }
             catch (InvalidCastException)
             {
@@ -152,7 +203,6 @@ namespace NHibernate.Search.Impl
 
             FilterDef filterDef = new FilterDef();
             filterDef.Impl = defAnn.Impl;
-            filterDef.Cache = defAnn.Cache;
             try
             {
                 Activator.CreateInstance(filterDef.Impl);
@@ -190,13 +240,34 @@ namespace NHibernate.Search.Impl
                 BindFilterDef(defAnn, mappedClass);
         }
 
-        private void BuildFilterCachingStrategy(IDictionary<string, string> properties)
+        private static IFilterCachingStrategy BuildFilterCachingStrategy(IDictionary<string, string> properties)
         {
-            string impl = GetProperty(properties, Environment.FilterCachingStrategy);
+            IFilterCachingStrategy strategy;
+            String impl;
+            properties.TryGetValue(Environment.FilterCachingStrategy, out impl);
+            if (string.IsNullOrEmpty(impl) || impl.Equals("mru", StringComparison.InvariantCultureIgnoreCase))
+            {
+                strategy = new MRUFilterCachingStrategy();
+            }
+            else
+            {
+                try
+                {
+                    System.Type filterCachingStrategyClass = ReflectHelper.ClassForName(impl);
+                    strategy = (IFilterCachingStrategy)Activator.CreateInstance(filterCachingStrategyClass);
+                }
+                catch (Exception e)
+                {
+                    throw new SearchException("Unable to instantiate filterCachingStrategy class: " + impl, e);
+                }
+            }
+            strategy.Initialize(properties);
+            return strategy;
         }
 
-        private void InitDocumentBuilders(Configuration cfg, Analyzer analyzer)
+        private void InitDocumentBuilders(INHSConfiguration nhsCfg, Configuration cfg, Analyzer analyzer)
         {
+            InitContext context = new InitContext(nhsCfg);
             DirectoryProviderFactory factory = new DirectoryProviderFactory();
             foreach (PersistentClass clazz in cfg.ClassMappings)
             {
@@ -208,13 +279,14 @@ namespace NHibernate.Search.Impl
                         DirectoryProviderFactory.DirectoryProviders providers =
                             factory.CreateDirectoryProviders(mappedClass, cfg, this);
 
-                        DocumentBuilder documentBuilder = new DocumentBuilder(mappedClass, analyzer, providers.Providers, providers.SelectionStrategy);
+                        DocumentBuilder documentBuilder = new DocumentBuilder(mappedClass, context, providers.Providers, providers.SelectionStrategy);
 
                         documentBuilders[mappedClass] = documentBuilder;
                     }
                     BindFilterDefs(mappedClass);
                 }
             }
+            analyzers = context.InitLazyAnalyzers();
             factory.StartDirectoryProviders();
         }
 
@@ -222,11 +294,25 @@ namespace NHibernate.Search.Impl
 
         #region Public methods
 
+        public IEnumerable<IDirectoryProvider> DirectoryProviders
+        {
+            get { return dirProviderData.Keys; }
+        }
+
+
+        public IDirectoryProvider[] GetDirectoryProviders(System.Type entity)
+        {
+            DocumentBuilder value;
+            if (DocumentBuilders.TryGetValue(entity, out value) == false)
+                return null;
+            return value.DirectoryProviders;
+        }
+
         public static SearchFactoryImpl GetSearchFactory(Configuration cfg)
         {
             if (contexts == null)
                 contexts = new WeakHashtable();
-            SearchFactoryImpl searchFactory = (SearchFactoryImpl) contexts[cfg];
+            SearchFactoryImpl searchFactory = (SearchFactoryImpl)contexts[cfg];
             if (searchFactory == null)
             {
                 searchFactory = new SearchFactoryImpl(cfg);
@@ -250,42 +336,37 @@ namespace NHibernate.Search.Impl
 
         public object GetLockObjForDirectoryProvider(IDirectoryProvider provider)
         {
-            return lockableDirectoryProviders[provider];
+            return dirProviderData[provider];
         }
 
-        public void PerformWork(object entity, object id, ISession session, WorkType workType)
+        public object GetDirectoryProviderLock(IDirectoryProvider dp)
         {
-            Work work = new Work(entity, id, workType);
-            worker.PerformWork(work, (ISessionImplementor) session);
-        }
+            DirectoryProviderData value;
+            if(dirProviderData.TryGetValue(dp, out value)==false)
+                return null;
 
-        public void RegisterDirectoryProviderForLocks(IDirectoryProvider provider)
-        {
-            if (lockableDirectoryProviders.ContainsKey(provider) == false)
-                lockableDirectoryProviders.Add(provider, new object());
+            return value.dirLock;
         }
 
         public FilterDef GetFilterDefinition(string name)
         {
-            throw new Exception("The method or operation is not implemented.");
+            FilterDef value;
+            if (filterDefinitions.TryGetValue(name, out value) == false)
+                return null;
+            return value;
         }
 
         public IOptimizerStrategy GetOptimizerStrategy(IDirectoryProvider provider)
         {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public IDirectoryProvider[] GetDirectoryProviders(System.Type entity)
-        {
-            if (!documentBuilders.ContainsKey(entity))
+            DirectoryProviderData value;
+            if (dirProviderData.TryGetValue(provider, out value) == false)
                 return null;
-            DocumentBuilder documentBuilder = documentBuilders[entity];
-            return documentBuilder.DirectoryProviders;
+            return value.optimizerStrategy;
         }
 
         public void Optimize()
         {
-            Dictionary<System.Type, DocumentBuilder>.KeyCollection clazzes = DocumentBuilders.Keys;
+            ICollection<System.Type> clazzes = DocumentBuilders.Keys;
             foreach (System.Type clazz in clazzes)
                 Optimize(clazz);
         }
@@ -298,21 +379,42 @@ namespace NHibernate.Search.Impl
             List<LuceneWork> queue = new List<LuceneWork>();
             queue.Add(new OptimizeLuceneWork(entityType));
             WaitCallback cb = BackendQueueProcessorFactory.GetProcessor(queue);
+            cb(null);
         }
 
-        public Dictionary<IDirectoryProvider, object> GetLockableDirectoryProviders()
+        public Analyzer GetAnalyzer(String name)
         {
-            return lockableDirectoryProviders;
+            Analyzer analyzer;
+
+            if (analyzers.TryGetValue(name, out analyzer) == false)
+                throw new SearchException("Unknown Analyzer definition: " + name);
+            return analyzer;
         }
+
+        public Analyzer GetAnalyzer(System.Type clazz)
+        {
+            if (clazz == null)
+            {
+                throw new ArgumentNullException("clazz", "A class has to be specified for retrieving a scoped analyzer");
+            }
+
+            DocumentBuilder builder;
+            if (documentBuilders.TryGetValue(clazz, out builder)==false)
+            {
+                throw new ArgumentException("Entity for which to retrieve the scoped analyzer is not an [Indexed] entity: " + clazz.Name);
+            }
+
+            return builder.Analyzer;
+        }	
 
         public void AddOptimizerStrategy(IDirectoryProvider provider, IOptimizerStrategy optimizerStrategy)
         {
-            dirProviderOptimizerStrategy[provider] = optimizerStrategy;
-        }
-
-        public IFilterCachingStrategy GetFilterCachingStrategy()
-        {
-            return filterCachingStrategy;
+            DirectoryProviderData data;
+            if (dirProviderData.TryGetValue(provider, out data) == false)
+            {
+                dirProviderData[provider] = data = new DirectoryProviderData();
+            }
+            data.optimizerStrategy = optimizerStrategy;
         }
 
         public LuceneIndexingParameters GetIndexingParameters(IDirectoryProvider provider)
@@ -325,6 +427,70 @@ namespace NHibernate.Search.Impl
             dirProviderIndexingParams[provider] = indexingParameters;
         }
 
+        public void AddClassToDirectoryProvider(System.Type clazz, IDirectoryProvider directoryProvider)
+        {
+            //no need to set a read barrier, we only use this class in the init thread
+            DirectoryProviderData data;
+            dirProviderData.TryGetValue(directoryProvider, out data);
+            if (data == null)
+            {
+                data = new DirectoryProviderData();
+                dirProviderData.Add(directoryProvider, data);
+            }
+            data.classes.Add(clazz);
+        }
+
+        public void Close()
+        {
+            if (Interlocked.CompareExchange(ref stopped, 1, 0) != 0)
+                return;
+
+            try
+            {
+                worker.Close();
+            }
+            catch (Exception e)
+            {
+                log.Error("Worker raises an exception on close()", e);
+            }
+
+            try
+            {
+                readerProvider.Destroy();
+            }
+            catch (Exception e)
+            {
+                log.Error("ReaderProvider raises an exception on destroy()", e);
+            }
+
+            foreach (IDirectoryProvider directoryProvider in DirectoryProviders)
+            {
+                try
+                {
+                    directoryProvider.Stop();
+                }
+                catch (Exception e)
+                {
+                    log.Error("DirectoryProvider raises an exception on stop() ", e);
+                }
+            }
+        }
+
+        public void AddDirectoryProvider(IDirectoryProvider provider)
+        {
+            dirProviderData.Add(provider, new DirectoryProviderData());
+        }
+
         #endregion
+
+        private class DirectoryProviderData
+        {
+            public readonly object dirLock = new object();
+            public IOptimizerStrategy optimizerStrategy;
+            public readonly ISet<System.Type> classes = new HashedSet<System.Type>();
+        }
+
     }
+
+
 }

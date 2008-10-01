@@ -6,5 +6,10 @@ namespace NHibernate.Search.Backend
             : base(null, null, entity, null)
         {
         }
+
+        public override T GetWorkDelegate<T>(IWorkVisitor<T> visitor)
+        {
+            return visitor.GetDelegate(this);
+        }
     }
 }

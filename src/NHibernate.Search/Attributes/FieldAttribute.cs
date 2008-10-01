@@ -1,4 +1,5 @@
 using System;
+using Lucene.Net.Documents;
 
 namespace NHibernate.Search.Attributes
 {
@@ -14,6 +15,7 @@ namespace NHibernate.Search.Attributes
         private Store store = Store.No;
         private System.Type analyzer;
         private FieldBridgeAttribute fieldBridge;
+        private TermVector termVector = TermVector.No;
 
         public FieldAttribute()
         {
@@ -54,6 +56,16 @@ namespace NHibernate.Search.Attributes
         }
 
         /// <summary>
+        /// Define term vector storage requirements,
+        /// defaults to No
+        /// </summary>
+        public TermVector TermVector
+        {
+            get { return termVector; }
+            set { termVector = value; }
+        }
+
+        /// <summary>
         /// Define an analyzer for the field, default to
         /// the inherited analyzer
         /// </summary>
@@ -66,7 +78,6 @@ namespace NHibernate.Search.Attributes
         /// <summary>
         /// Field bridge used. Default is autowired.
         /// </summary>
-        /// TODO: Not sure if this is correct
         public FieldBridgeAttribute FieldBridge
         {
             get { return fieldBridge; }

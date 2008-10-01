@@ -24,7 +24,7 @@ namespace NHibernate.Search.Tests.FieldAccess {
 
             s.Clear();
 
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
             tx = session.BeginTransaction();
             QueryParser p = new QueryParser("id", new StandardAnalyzer());
             IList result = session.CreateFullTextQuery(p.Parse("title:Action OR Abstract:Action")).List();
@@ -47,7 +47,7 @@ namespace NHibernate.Search.Tests.FieldAccess {
 
             s.Clear();
 
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
             tx = session.BeginTransaction();
             QueryParser p = new QueryParser("id", new StandardAnalyzer());
             IList result = session.CreateFullTextQuery(p.Parse("Abstract:Hibernate")).List();

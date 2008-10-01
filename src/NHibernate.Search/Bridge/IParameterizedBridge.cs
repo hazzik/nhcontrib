@@ -7,6 +7,6 @@ namespace NHibernate.Search.Bridge
     /// </summary>
     public interface IParameterizedBridge
     {
-        void SetParameterValues(Dictionary<string, object> parameters);
+        void SetParameterValues(IDictionary<string, object> parameters);
     }
 }

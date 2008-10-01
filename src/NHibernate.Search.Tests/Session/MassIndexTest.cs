@@ -13,7 +13,7 @@ namespace NHibernate.Search.Tests.Sessions {
 
         [Test]
         public void Transactional() {
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             int loop = 4;
             for (int i = 0; i < loop; i++)
@@ -61,7 +61,7 @@ namespace NHibernate.Search.Tests.Sessions {
             tx.Commit(); //do the process
             s.Close();
 
-            s = Search.CreateFullTextSession(OpenSession());
+            s = Search.GetFullTextSession(OpenSession());
             tx = s.BeginTransaction();
             //object never indexed
             Email email = (Email) s.Get(typeof (Email), loop + 1);

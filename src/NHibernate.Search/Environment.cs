@@ -20,6 +20,11 @@ namespace NHibernate.Search
         /// </summary>
         public const string AnalyzerClass = "hibernate.search.analyzer";
 
+        /// <summary>
+        /// Default Lucene similarity
+        /// </summary>
+        public const string SimilarityClass = "hibernate.search.similarity";
+
         public const string WorkerPrefix = "hibernate.search.worker.";
         public const string WorkerScope = WorkerPrefix + "scope";
         public const string WorkerBackend = WorkerPrefix + "backend";
@@ -55,6 +60,11 @@ namespace NHibernate.Search
         /// Filter caching strategy class (must have a no-arg constructor and implements <see cref="IFilterCachingStrategy" />)
         /// </summary>
         public const string FilterCachingStrategy = "hibernate.search.filter.cache_strategy";
+
+        /// <summary>
+        /// Property name for the hard ref count of our <code>CachingWrapperFilter</code>.
+        /// </summary>
+        public const string CacheBitResultSize = "hibernate.search.filter.cache_bit_results.size";
 
         public const string SourceBase = "sourceBase";
         public const string Source = "source";

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Lucene.Net.Documents;
 
 namespace NHibernate.Search.Attributes
 {
@@ -12,15 +13,16 @@ namespace NHibernate.Search.Attributes
     /// We allow multiple instances of this attribute rather than having a ClassBridgesAttribute as per Java
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class ClassBridgeAttribute : Attribute
+    public class ClassBridgeAttribute : Attribute, IBridgeAttribute
     {
         private readonly System.Type impl;
         private readonly Dictionary<string, object> parameters;
         private System.Type analyzer;
         private float boost = 1.0F;
         private Index index = Index.Tokenized;
-        private string name = null;
+        private string name;
         private Store store = Store.No;
+        private TermVector termVector = TermVector.No;
 
         #region Constructors
 
@@ -62,6 +64,16 @@ namespace NHibernate.Search.Attributes
         }
 
         /// <summary>
+        /// Define term vector storage requirements,
+        /// default to No.
+        /// </summary>
+        public TermVector TermVector
+        {
+            get { return termVector; }
+            set { termVector = value; }
+        }
+
+        /// <summary>
         /// Define an analyzer for the field, default to the inherited analyzer.
         /// </summary>
         /// <remarks>The Java uses an Analyzer annotation here, we can't do that, so just supply the analyzer's type</remarks>
@@ -90,10 +102,10 @@ namespace NHibernate.Search.Attributes
         }
 
         /// <summary>
-        /// Array of fields to work with. The imnpl class
+        /// Array of fields to work with. The impl class
         /// above will work on these fields.
         /// </summary>
-        public Dictionary<string, object> Parameters
+        public IDictionary<string, object> Parameters
         {
             get { return parameters; }
         }

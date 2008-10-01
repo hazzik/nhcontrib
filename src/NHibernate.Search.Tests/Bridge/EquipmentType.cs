@@ -37,7 +37,7 @@ namespace NHibernate.Search.Tests.Bridge
 
         #region IParameterizedBridge Members
 
-        public void SetParameterValues(Dictionary<string, object> parameters)
+        public void SetParameterValues(IDictionary<string, object> parameters)
         {
             // This map was defined by the parameters of the ClassBridge annotation.
             equips = parameters;

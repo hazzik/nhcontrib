@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Collections.Specialized;
+using System.Collections.Generic;
+
 namespace NHibernate.Search.Filter
 {
     /// <summary>
@@ -10,7 +14,7 @@ namespace NHibernate.Search.Filter
         /// The Properties must not be changed
         /// </summary>
         /// <param name="properties"></param>
-        void Initialize(object properties);
+        void Initialize(IDictionary<string,string> properties);
 
         /// <summary>
         /// Retrieve the cached filter for a given key or null if not cached

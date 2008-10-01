@@ -12,7 +12,7 @@ namespace NHibernate.Search.Attributes
     {
         private readonly string name;
         private readonly System.Type impl;
-        private bool cache = true;
+        private FilterCacheModeType cacheMode = FilterCacheModeType.InstanceAndBitResults;
 
         public FullTextFilterDefAttribute(string name, System.Type impl)
         {
@@ -43,10 +43,10 @@ namespace NHibernate.Search.Attributes
         /// <summary>
         /// Enable caching for this filter (default true).
         /// </summary>
-        public bool Cache
+        public FilterCacheModeType CacheMode
         {
-            get { return cache; }
-            set { cache = value; }
+            get { return cacheMode; }
+            set { cacheMode = value; }
         }
     }
 }

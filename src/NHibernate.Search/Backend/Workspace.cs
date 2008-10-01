@@ -6,7 +6,6 @@ using log4net;
 using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Search.Store;
 using NHibernate.Search.Store.Optimization;
 

@@ -9,11 +9,25 @@ namespace NHibernate.Search.Attributes
     /// - field / method
     /// - entity
     /// - default
+    /// 
+    /// Either describe an explicit implementation through the <code>impl</code> parameter
+    /// or use an external [AnalyzerDef] definition through the <code>def</code> parameter
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class AnalyzerAttribute : Attribute
     {
         private readonly System.Type type;
+        private readonly string definition;
+
+        public AnalyzerAttribute(string definition)
+        {
+            this.definition = definition;
+        }
+
+        public string Definition
+        {
+            get { return definition; }
+        }
 
         public AnalyzerAttribute(System.Type value)
         {
@@ -24,5 +38,5 @@ namespace NHibernate.Search.Attributes
         {
             get { return type; }
         }
-    }
+    }  
 }

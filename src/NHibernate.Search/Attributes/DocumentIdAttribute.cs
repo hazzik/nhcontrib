@@ -10,7 +10,7 @@ namespace NHibernate.Search.Attributes
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class DocumentIdAttribute : Attribute
     {
-        private string name = null;
+        private string name;
 
         public string Name
         {

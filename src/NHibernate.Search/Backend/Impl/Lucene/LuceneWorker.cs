@@ -4,12 +4,14 @@ using log4net;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Search.Store;
 using NHibernate.Search.Util;
 
 namespace NHibernate.Search.Backend.Impl.Lucene
 {
+    /// <summary>
+    /// Stateless implementation that performs a unit of work.
+    /// </summary>
     public class LuceneWorker
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(LuceneWorker));
@@ -67,8 +69,8 @@ namespace NHibernate.Search.Backend.Impl.Lucene
         private void Remove(System.Type entity, object id, IDirectoryProvider provider)
         {
             /*
-            * even with Lucene 2.1, use of indexWriter to delte is not an option
-            * We can only delete by term, and the index doesn't have a termt that
+            * even with Lucene 2.1, use of indexWriter to delete is not an option
+            * We can only delete by term, and the index doesn't have a term that
             * uniquely identify the entry. See logic below
             */
             log.DebugFormat("remove from Lucene index: {0}#{1}", entity, id);
@@ -98,6 +100,7 @@ namespace NHibernate.Search.Backend.Impl.Lucene
             finally
             {
                 if (termDocs != null)
+                {
                     try
                     {
                         termDocs.Close();
@@ -106,6 +109,7 @@ namespace NHibernate.Search.Backend.Impl.Lucene
                     {
                         log.Warn("Unable to close termDocs properly", e);
                     }
+                }
             }
         }
 

@@ -1,21 +1,35 @@
 using System;
+using System.Collections.Generic;
 
 namespace NHibernate.Search.Query
 {
     public class FullTextFilterImpl : IFullTextFilter
     {
-        #region IFullTextFilter Members
+        private readonly Dictionary<string, object> parameters = new Dictionary<string, object>();
+        private string name;
 
-        public IFullTextFilter SetParameter(string name, object value)
+        public string Name
         {
-            throw new Exception("The method or operation is not implemented.");
+            get { return name; }
+            set { name = value; }
         }
 
-        public object GetParameter(string name)
+        public IFullTextFilter SetParameter(string paramName, object value)
         {
-            throw new Exception("The method or operation is not implemented.");
+            parameters[paramName] = value;
         }
 
-        #endregion
+        public object GetParameter(string paramName)
+        {
+            object value;
+            if (parameters.TryGetValue(paramName, out value) == false)
+                return null;
+            return value;
+        }
+
+        public Dictionary<string, object> Parameters
+        {
+            get { return parameters; }
+        }
     }
 }

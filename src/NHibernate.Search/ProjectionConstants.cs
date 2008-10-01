@@ -1,3 +1,5 @@
+using Lucene.Net.Search;
+
 namespace NHibernate.Search
 {
     public static class ProjectionConstants
@@ -17,10 +19,8 @@ namespace NHibernate.Search
         /// </summary>
         public const string SCORE = "__HSearch_Score";
 
-        /// <summary>
-        /// The boost value of the Lucene document.
-        /// </summary>
-        public const string BOOST = "__HSearch_Boost";
+        // deprecated in hiberante search
+        //public const string BOOST = "__HSearch_Boost";
 
         /// <summary>
         /// Object id property
@@ -35,5 +35,14 @@ namespace NHibernate.Search
         /// Expert: Lucene document id can change overtime between 2 different IndexReader opening.
         /// </remarks>
         public const string DOCUMENT_ID = "__HSearch_DocumentId";
+
+        ///<summary> Lucene <seealso cref="Explanation"/> object describing the score computation for
+        ///the matching object/document
+        ///This feature is relatively expensive, do not use unless you return a limited
+        ///amount of objects (using pagination)
+        ///To retrieve explanation of a single result, consider retrieving <seealso cref="DOCUMENT_ID"/>
+        ///and using fullTextQuery.explain(int) 
+        /// </summary>
+        public const string EXPLANATION = "__HSearch_Explanation";
     }
 }

@@ -95,7 +95,7 @@ namespace NHibernate.Search.Tests.DirectoryProvider
             sn.DateTime = DateTime.Now;
             sn.Location = ("Dallas, TX, USA");
 
-            IFullTextSession fts2 = Search.CreateFullTextSession(CreateSession(1));
+            IFullTextSession fts2 = Search.GetFullTextSession(CreateSession(1));
             QueryParser parser = new QueryParser("id", new StopAnalyzer());
             IList result = fts2.CreateFullTextQuery(parser.Parse("Location:texas")).List();
             Assert.AreEqual(0, result.Count, "No copy yet, fresh index expected");
@@ -110,11 +110,11 @@ namespace NHibernate.Search.Tests.DirectoryProvider
             Thread.Sleep(waitPeriod);
 
             //temp test original
-            fts2 = Search.CreateFullTextSession(CreateSession(0));
+            fts2 = Search.GetFullTextSession(CreateSession(0));
             result = fts2.CreateFullTextQuery(parser.Parse("Location:dallas")).List();
             Assert.AreEqual(1, result.Count, "Original should get one");
 
-            fts2 = Search.CreateFullTextSession(CreateSession(1));
+            fts2 = Search.GetFullTextSession(CreateSession(1));
             result = fts2.CreateFullTextQuery(parser.Parse("Location:dallas")).List();
             Assert.AreEqual(1, result.Count, "First copy did not work out");
 
@@ -131,7 +131,7 @@ namespace NHibernate.Search.Tests.DirectoryProvider
 
             Thread.Sleep(waitPeriod); //wait a bit more than 2 refresh (one master / one slave)
 
-            fts2 = Search.CreateFullTextSession(CreateSession(1));
+            fts2 = Search.GetFullTextSession(CreateSession(1));
             result = fts2.CreateFullTextQuery(parser.Parse("Location:chennai")).List();
             Assert.AreEqual(1, result.Count, "Second copy did not work out");
 
@@ -148,7 +148,7 @@ namespace NHibernate.Search.Tests.DirectoryProvider
 
             Thread.Sleep(waitPeriod); //wait a bit more than 2 refresh (one master / one slave)
 
-            fts2 = Search.CreateFullTextSession(CreateSession(1));
+            fts2 = Search.GetFullTextSession(CreateSession(1));
             result = fts2.CreateFullTextQuery(parser.Parse("Location:melbourne")).List();
             Assert.AreEqual(1, result.Count, "Third copy did not work out");
 
