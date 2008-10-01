@@ -6,7 +6,6 @@ using NHibernate.Mapping;
 using NHibernate.Search.Attributes;
 using NHibernate.Search.Backend;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Search.Store.Optimization;
 using NHibernate.Util;
 

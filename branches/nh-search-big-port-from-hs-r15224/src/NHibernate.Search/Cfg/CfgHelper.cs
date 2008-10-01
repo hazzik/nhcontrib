@@ -46,7 +46,7 @@ namespace NHibernate.Search.Cfg
             return Path.Combine(binPath, DefaultNHSCfgFileName);
         }
 
-        public static void Configure(Configuration nhCfg)
+        public static INHSConfiguration Configure(Configuration nhCfg)
         {
             if (configCollection == null)
                 configCollection = LoadConfiguration();
@@ -63,6 +63,7 @@ namespace NHibernate.Search.Cfg
                 foreach (KeyValuePair<string, string> pair in configuration.Properties)
                     nhCfg.Properties.Add(pair.Key, pair.Value);
             }
+            return configuration;
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using log4net;
 using NHibernate.Search.Backend.Impl.Lucene;
 using NHibernate.Search.Engine;
 using NHibernate.Search.Impl;
@@ -15,19 +16,22 @@ namespace NHibernate.Search.Backend.Impl
     /// </summary>
     public class BatchedQueueingProcessor : IQueueingProcessor
     {
+        private readonly ILog log = LogManager.GetLogger(typeof (BatchedQueueingProcessor));
         private readonly IBackendQueueProcessorFactory backendQueueProcessorFactory;
         private readonly int batchSize;
-        private readonly SearchFactoryImpl searchFactory;
+        private readonly ISearchFactoryImplementor searchFactory;
         private readonly bool sync;
+        private bool continueProcessing;
 
-        public BatchedQueueingProcessor(SearchFactoryImpl searchFactory, IDictionary properties)
+        public BatchedQueueingProcessor(ISearchFactoryImplementor searchFactory, IDictionary<string,string> properties)
         {
             this.searchFactory = searchFactory;
             //default to sync if none defined
-            this.sync = !"async".Equals((string) properties[Environment.WorkerExecution],StringComparison.InvariantCultureIgnoreCase);
+            sync = !"async".Equals((string) properties[Environment.WorkerExecution],StringComparison.InvariantCultureIgnoreCase);
 
-            string backend = (string) properties[Environment.WorkerBackend];
-            batchSize = 0; //(int)properties[Environment.WorkerBatchSize];
+            int.TryParse(properties[Environment.WorkerBatchSize], out batchSize);
+
+            string backend = (string)properties[Environment.WorkerBackend];
             if (StringHelper.IsEmpty(backend) || "lucene".Equals(backend, StringComparison.InvariantCultureIgnoreCase))
             {
                 backendQueueProcessorFactory = new LuceneBackendQueueProcessorFactory();
@@ -68,9 +72,17 @@ namespace NHibernate.Search.Backend.Impl
         {
             WaitCallback processor = backendQueueProcessorFactory.GetProcessor(workQueue.GetSealedQueue());
             if (sync)
+            {
                 processor(null);
+            }
             else
-                ThreadPool.QueueUserWorkItem(processor);
+            {
+                ThreadPool.QueueUserWorkItem(delegate(object state)
+                {
+                    if (continueProcessing)
+                        processor(state);
+                });
+            }
         }
 
         public void CancelWorks(WorkQueue workQueue)
@@ -90,8 +102,8 @@ namespace NHibernate.Search.Backend.Impl
 			 *
 			 * Processing collection works last is mandatory to avoid reindexing a object to be deleted
 			 */
-            ProcessWorkByLayer(queue, initialSize, luceneQueue, Layer.FIRST);
-            ProcessWorkByLayer(queue, initialSize, luceneQueue, Layer.SECOND);
+            ProcessWorkByLayer(queue, initialSize, luceneQueue, Layer.First);
+            ProcessWorkByLayer(queue, initialSize, luceneQueue, Layer.Second);
             workQueue.SetSealedQueue(luceneQueue);
         }
 
@@ -122,39 +134,39 @@ namespace NHibernate.Search.Backend.Impl
             }
         }
 
+        public void Close()
+        {
+            // hibernate search stops the thread pool here.
+            // we just set the stop flag
+            continueProcessing = false;
+        }
+
         #region Nested type: Layer
 
-        private abstract class Layer
+        private class Layer
         {
-            public static readonly Layer FIRST = new First();
-            public static readonly Layer SECOND = new Second();
-            public abstract bool IsRightLayer(WorkType type);
-
-            #region Nested type: First
-
-            private class First : Layer
+            public static readonly Layer First = new Layer(delegate(WorkType type)
             {
-                public override bool IsRightLayer(WorkType type)
-                {
-                    //return  type != WorkType.COLLECTION ;
-                    return true;
-                }
+                return type != WorkType.Collection;
+            });
+            public static readonly Layer Second = new Layer(delegate(WorkType type)
+            {
+                return type == WorkType.Collection;
+            });
+
+            public delegate bool IsRightLayerDelegate(WorkType type);
+
+            private readonly IsRightLayerDelegate isRightLayer;
+
+            protected Layer(IsRightLayerDelegate isRightLayer)
+            {
+                this.isRightLayer = isRightLayer;
             }
 
-            #endregion
-
-            #region Nested type: Second
-
-            private class Second : Layer
+            public bool IsRightLayer(WorkType type)
             {
-                public override bool IsRightLayer(WorkType type)
-                {
-                    //return type == WorkType.COLLECTION;
-                    return false;
-                }
+                return isRightLayer(type);
             }
-
-            #endregion
         }
 
         #endregion

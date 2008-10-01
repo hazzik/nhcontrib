@@ -19,29 +19,24 @@ namespace NHibernate.Search.Engine
 
         public object Load(EntityInfo entityInfo)
         {
-            object maybeProxy = session.Get(entityInfo.Clazz, entityInfo.Id);
-            // TODO: Initialize call and error trapping
-            try
-            {
-                NHibernateUtil.Initialize(maybeProxy);
-            }
-            catch (Exception e)
-            {
-                if (LoaderHelper.IsObjectNotFoundException(e))
-                {
-                    log.Debug("Object found in Search index but not in database: "
-                              + entityInfo.Clazz + " wih id " + entityInfo.Id);
-                    maybeProxy = null;
-                }
-                else
-                    throw;
-            }
-
-            return maybeProxy;
+            return ObjectLoaderHelper.Load(entityInfo, session);
         }
 
         public IList Load(params EntityInfo[] entityInfos)
         {
+            if (entityInfos.Length == 0) return new object[0];
+            if (entityInfos.Length == 1)
+            {
+                Object entity = Load(entityInfos[0]);
+                if (entity == null)
+                {
+                    return new object[0];
+                }
+                IList list = new ArrayList(1);
+                list.Add(entity);
+                return list;
+            }
+
             // Use load to benefit from the batch-size
             // We don't face proxy casting issues since the exact class is extracted from the index
             foreach (EntityInfo entityInfo in entityInfos)
@@ -64,10 +59,12 @@ namespace NHibernate.Search.Engine
                     if (LoaderHelper.IsObjectNotFoundException(e))
                     {
                         log.Debug("Object found in Search index but not in database: "
-                                  + entityInfo.Clazz + " wih id " + entityInfo.Id);
+                                  + entityInfo.Clazz + " with id " + entityInfo.Id);
                     }
                     else
+                    {
                         throw;
+                    }
                 }
             }
 

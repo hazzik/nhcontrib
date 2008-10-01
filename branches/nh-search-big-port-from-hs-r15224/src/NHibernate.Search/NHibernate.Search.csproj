@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\AnalyzerAttribute.cs" />
+    <Compile Include="Attributes\AnalyzerDefAttribute.cs" />
     <Compile Include="Attributes\BoostAttribute.cs" />
     <Compile Include="Attributes\BridgeParameterAttribute.cs" />
     <Compile Include="Attributes\ClassBridgeAttribute.cs" />
@@ -60,22 +61,38 @@
     <Compile Include="Attributes\FactoryAttribute.cs" />
     <Compile Include="Attributes\FieldAttribute.cs" />
     <Compile Include="Attributes\FieldBridgeAttribute.cs" />
+    <Compile Include="Attributes\FilterCacheModeType.cs" />
     <Compile Include="Attributes\FullTextFilterDefAttribute.cs" />
+    <Compile Include="Attributes\IBridgeAttribute.cs" />
     <Compile Include="Attributes\Index.cs" />
     <Compile Include="Attributes\Indexed.cs" />
     <Compile Include="Attributes\IndexedEmbedded.cs" />
     <Compile Include="Attributes\KeyAttribute.cs" />
+    <Compile Include="Attributes\ProvidedIdAttribute.cs" />
     <Compile Include="Attributes\Resolution.cs" />
+    <Compile Include="Attributes\SimilarityAttribute.cs" />
     <Compile Include="Attributes\Store.cs" />
+    <Compile Include="Attributes\TermVector.cs" />
+    <Compile Include="Attributes\TokenFilterDefAttribute.cs" />
+    <Compile Include="Attributes\TokenizerDefAttribute.cs" />
     <Compile Include="AttributeUtil.cs" />
+    <Compile Include="Backend\Configuration\ConfigurationParseHelper.cs" />
+    <Compile Include="Backend\Configuration\IndexWriterSetting.cs" />
+    <Compile Include="Backend\Configuration\MaskedProperty.cs" />
+    <Compile Include="Backend\Impl\EventSourceTransactionContext.cs" />
     <Compile Include="Backend\Impl\PostTransactionWorkQueueSynchronization.cs" />
     <Compile Include="Backend\Impl\TransactionalWorker.cs" />
+    <Compile Include="Backend\ITransactionContext.cs" />
     <Compile Include="Backend\IWorker.cs" />
     <Compile Include="Backend\LuceneIndexingParameters.cs" />
     <Compile Include="Backend\OptimizeLuceneWork.cs" />
     <Compile Include="Backend\PurgeAllLuceneWork.cs" />
     <Compile Include="Backend\WorkerFactory.cs" />
     <Compile Include="Backend\WorkQueue.cs" />
+    <Compile Include="Backend\IWorkVisitor.cs" />
+    <Compile Include="Bridge\Builtin\ClassBridge.cs" />
+    <Compile Include="Bridge\Builtin\UriBridge.cs" />
+    <Compile Include="Bridge\LuceneOptions.cs" />
     <Compile Include="Cfg\CfgHelper.cs" />
     <Compile Include="Cfg\CfgXmlHelper.cs" />
     <Compile Include="Cfg\ConfigurationSectionHandler.cs" />
@@ -91,19 +108,24 @@
     <Compile Include="Engine\ISearchFactoryImplementor.cs" />
     <Compile Include="Engine\ILoader.cs" />
     <Compile Include="Engine\LoaderHelper.cs" />
+    <Compile Include="Engine\MultiClassesQueryLoader.cs" />
     <Compile Include="Engine\ObjectLoader.cs" />
+    <Compile Include="Engine\ObjectLoaderHelper.cs" />
     <Compile Include="Engine\ProjectionLoader.cs" />
     <Compile Include="Engine\QueryLoader.cs" />
-    <Compile Include="Event\FullTextIndexCollectionEventListener.cs" />
+    <Compile Include="Event\ContextHolder.cs" />
+    <Compile Include="Event\EventListenerRegister.cs" />
     <Compile Include="Event\FullTextIndexEventListener.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Filter\CachingWrapperFilter.cs" />
     <Compile Include="Filter\ChainedFilter.cs" />
     <Compile Include="Filter\FilterKey.cs" />
     <Compile Include="Filter\IFilterCachingStrategy.cs" />
     <Compile Include="Filter\MruFilterCachingStrategy.cs" />
     <Compile Include="Filter\StandardFilterKey.cs" />
     <Compile Include="IFullTextFilter.cs" />
+    <Compile Include="Impl\InitContext.cs" />
     <Compile Include="Impl\SearchFactoryImpl.cs" />
     <Compile Include="ISearchFactory.cs" />
     <Compile Include="ProjectionConstants.cs" />
@@ -111,7 +133,9 @@
     <Compile Include="Query\FullTextSearchHelper.cs" />
     <Compile Include="LuceneQueryExpression.cs" />
     <Compile Include="Backend\Impl\Lucene\LuceneWorker.cs" />
+    <Compile Include="Query\NoLoader.cs" />
     <Compile Include="SearchRestrictions.cs" />
+    <Compile Include="Util\DelegateNamedAnalyzer.cs" />
     <Compile Include="Util\DirectoryProviderHelper.cs" />
     <Compile Include="Bridge\IFieldBridge.cs" />
     <Compile Include="IFullTextSession.cs" />

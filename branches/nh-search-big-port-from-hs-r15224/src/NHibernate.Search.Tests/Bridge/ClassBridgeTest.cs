@@ -128,7 +128,7 @@ namespace NHibernate.Search.Tests.Bridge
             tx.Commit();
 
             tx = s.BeginTransaction();
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
 
             // The branchnetwork field is the concatenation of both
             // the branch field and the network field of the Department
@@ -189,7 +189,7 @@ namespace NHibernate.Search.Tests.Bridge
             tx.Commit();
 
             tx = s.BeginTransaction();
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
 
             // The equipment field is the manufacturer field  in the
             // Departments entity after being massaged by passing it

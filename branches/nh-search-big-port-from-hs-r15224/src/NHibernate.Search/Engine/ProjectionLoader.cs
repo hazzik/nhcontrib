@@ -16,16 +16,15 @@ namespace NHibernate.Search.Engine
 
         private void InitThisProjectionFlag(EntityInfo entityInfo)
         {
-            if (projectThis == null)
-            {
-                projectThis = entityInfo.IndexesOfThis != null;
-                if (projectThis == true)
-                {
-                    //TODO use QueryLoader when possible
-                    objectLoader = new ObjectLoader();
-                    objectLoader.Init(session, searchFactoryImplementor);
-                }
-            }
+            if (projectThis != null) 
+                return;
+            projectThis = entityInfo.IndexesOfThis != null;
+            if (projectThis != true) 
+                return;
+
+            //TODO use QueryLoader when possible
+            objectLoader = new ObjectLoader();
+            objectLoader.Init(session, searchFactoryImplementor);
         }
 
         #endregion

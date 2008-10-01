@@ -23,7 +23,7 @@ namespace NHibernate.Search.Tests.Analyzer
             en.Component = new MyComponent();
             en.Component.ComponentProperty = "component property";
 
-            IFullTextSession s = Search.CreateFullTextSession(OpenSession());
+            IFullTextSession s = Search.GetFullTextSession(OpenSession());
             ITransaction tx = s.BeginTransaction();
             s.Save(en);
             s.Flush();

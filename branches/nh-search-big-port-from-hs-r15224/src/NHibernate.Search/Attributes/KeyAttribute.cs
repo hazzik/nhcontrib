@@ -1,4 +1,5 @@
 using System;
+using NHibernate.Search.Bridge;
 
 namespace NHibernate.Search.Attributes
 {
@@ -9,7 +10,7 @@ namespace NHibernate.Search.Attributes
     /// The key object must implement equals / hashcode so that 2 keys are equals iif
     /// the given target object types are the same, the set of parameters are the same.
     ///
-    /// <see cref="FactoryAttribute" currently works for FullTextFilterDef.impl classes
+    /// <see cref="FactoryAttribute"/> currently works for FullTextFilterDef.impl classes
     /// </summary>
     [AttributeUsage(AttributeTargets.Method,  AllowMultiple = false)]
     public class KeyAttribute : Attribute

@@ -4,7 +4,6 @@ using Lucene.Net.Search;
 using NHibernate.Criterion;
 using NHibernate.Impl;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Search.Util;
 using NHibernate.SqlCommand;
 

@@ -1,3 +1,5 @@
+using System;
+using Lucene.Net.Analysis;
 using NHibernate.Search.Reader;
 using NHibernate.Search.Store;
 
@@ -35,5 +37,19 @@ namespace NHibernate.Search
         /// </summary>
         /// <param name="entityType"></param>
         void Optimize(System.Type entityType);
+
+        ///<summary> Experimental API
+        ///retrieve an analyzer instance by its definition name
+        /// </summary>
+        ///<exception cref="SearchException"> if the definition name is unknown </exception>
+        Analyzer GetAnalyzer(string name);
+
+        ///<summary> Retrieves the scoped analyzer for a given class.
+        /// </summary>
+        ///<param name="clazz"> The class for which to retrieve the analyzer. </param>
+        ///<returns> The scoped analyzer for the specified class. </returns>
+        ///<exception cref="ArgumentException"> in case <code>clazz == null</code> or the specified
+        ///class is not an indexed entity. </exception>
+        Analyzer GetAnalyzer(System.Type clazz);
     }
 }

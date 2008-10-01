@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Iesi.Collections.Generic;
 using NHibernate.Search.Backend;
 using NHibernate.Search.Filter;
 using NHibernate.Search.Store;
@@ -13,9 +14,7 @@ namespace NHibernate.Search.Engine
     {
         IBackendQueueProcessorFactory BackendQueueProcessorFactory { get; set; }
 
-        Dictionary<System.Type, DocumentBuilder> DocumentBuilders { get; }
-
-        Dictionary<IDirectoryProvider, object> GetLockableDirectoryProviders();
+        IDictionary<System.Type, DocumentBuilder> DocumentBuilders { get; }
 
         IWorker Worker { get; }
 
@@ -23,12 +22,28 @@ namespace NHibernate.Search.Engine
 
         IOptimizerStrategy GetOptimizerStrategy(IDirectoryProvider provider);
 
-        IFilterCachingStrategy GetFilterCachingStrategy();
+        IFilterCachingStrategy FilterCachingStrategy { get; }
 
         FilterDef GetFilterDefinition(string name);
 
         LuceneIndexingParameters GetIndexingParameters(IDirectoryProvider provider);
 
         void AddIndexingParameters(IDirectoryProvider provider, LuceneIndexingParameters indexingParameters);
+
+        string IndexingStrategy { get; }
+
+        void Close();
+
+        void AddClassToDirectoryProvider(System.Type clazz, IDirectoryProvider directoryProvider);
+
+        ISet<System.Type> GetClassesInDirectoryProvider(IDirectoryProvider directoryProvider);
+
+        IEnumerable<IDirectoryProvider> DirectoryProviders { get; }
+
+        object GetDirectoryProviderLock(IDirectoryProvider dp);
+
+        void AddDirectoryProvider(IDirectoryProvider provider);
+
+        int FilterCacheBitResultsSize { get; }
     }
 }

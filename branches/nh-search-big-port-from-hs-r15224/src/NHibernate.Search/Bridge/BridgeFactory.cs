@@ -40,15 +40,20 @@ namespace NHibernate.Search.Bridge
 
         public static readonly ITwoWayFieldBridge STRING = new TwoWayString2FieldBridgeAdaptor(new StringBridge());
 
+        public static readonly ITwoWayFieldBridge CLAZZ = new TwoWayString2FieldBridgeAdaptor(new ClassBridge());
+        public static readonly ITwoWayFieldBridge URI = new TwoWayString2FieldBridgeAdaptor(new UriBridge());
+
         static BridgeFactory()
         {
-            builtInBridges.Add(typeof(double).Name, DOUBLE);
+            builtInBridges.Add(typeof(Double).Name, DOUBLE);
             builtInBridges.Add(typeof(float).Name, FLOAT);
             builtInBridges.Add(typeof(short).Name, SHORT);
             builtInBridges.Add(typeof(int).Name, INTEGER);
             builtInBridges.Add(typeof(long).Name, LONG);
             builtInBridges.Add(typeof(String).Name, STRING);
             builtInBridges.Add(typeof(Boolean).Name, BOOLEAN);
+            builtInBridges.Add(typeof(System.Type).Name, CLAZZ);
+            builtInBridges.Add(typeof(Uri).Name, URI);
 
             builtInBridges.Add(typeof(DateTime).Name, DATE_MILLISECOND);
         }
@@ -57,35 +62,20 @@ namespace NHibernate.Search.Bridge
         {
         }
 
-        public static IFieldBridge ExtractType(ClassBridgeAttribute cb)
+        /// <summary>
+        /// This extracts and instantiates the implementation class from a ClassBridge
+        /// annotation.
+        /// </summary>
+        /// <param name="cb"></param>
+        /// <returns></returns>
+        public static IFieldBridge ExtractType(IBridgeAttribute cb)
         {
             IFieldBridge bridge = null;
 
             if (cb != null)
             {
-                System.Type impl = cb.Impl;
-
-                if (impl != null)
-                {
-                    try
-                    {
-                        Object instance = Activator.CreateInstance(impl);
-                        if (typeof(IFieldBridge).IsAssignableFrom(impl))
-                            bridge = (IFieldBridge)instance;
-                        if (cb.Parameters.Count > 0 && typeof(IParameterizedBridge).IsAssignableFrom(impl))
-                        {
-                            // Already converted the parameters by this stage
-                            ((IParameterizedBridge) instance).SetParameterValues(cb.Parameters);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        //TODO add classname
-                        throw new HibernateException("Unable to instantiate IFieldBridge for " + cb.Name, e);
-                    }
-                }
+                bridge = DoExtractType(cb, null);
             }
-            //TODO add classname
             if (bridge == null) throw new HibernateException("Unable to guess IFieldBridge ");
 
             return bridge;
@@ -97,25 +87,7 @@ namespace NHibernate.Search.Bridge
             FieldBridgeAttribute bridgeAnn = AttributeUtil.GetFieldBridge(member);
             if (bridgeAnn != null)
             {
-                System.Type impl = bridgeAnn.Impl;
-                try
-                {
-                    Object instance = Activator.CreateInstance(impl);
-                    if (typeof(IFieldBridge).IsAssignableFrom(impl))
-                        bridge = (IFieldBridge) instance;
-                    else if (typeof(ITwoWayStringBridge).IsAssignableFrom(impl))
-                        bridge = new TwoWayString2FieldBridgeAdaptor(
-                            (ITwoWayStringBridge) instance);
-                    else if (typeof(StringBridge).IsAssignableFrom(impl))
-                        bridge = new String2FieldBridgeAdaptor((StringBridge) instance);
-                    if (bridgeAnn.Parameters.Count > 0 && typeof(IParameterizedBridge).IsAssignableFrom(impl))
-                        ((IParameterizedBridge) instance).SetParameterValues(bridgeAnn.Parameters);
-                }
-                catch (Exception e)
-                {
-                    //TODO add classname
-                    throw new HibernateException("Unable to instaniate IFieldBridge for " + member.Name, e);
-                }
+                bridge = DoExtractType(bridgeAnn, member);
             }
             else if (AttributeUtil.IsDateBridge(member))
             {
@@ -140,6 +112,44 @@ namespace NHibernate.Search.Bridge
             return bridge;
         }
 
+        private static IFieldBridge DoExtractType(IBridgeAttribute bridgeAnn, MemberInfo member)
+        {
+            System.Type impl = bridgeAnn.Impl;
+            IFieldBridge bridge = null;
+            try
+            {
+                Object instance = Activator.CreateInstance(impl);
+                if (impl is IFieldBridge)
+                    bridge = (IFieldBridge)instance;
+                else if (impl is ITwoWayStringBridge)
+                    bridge = new TwoWayString2FieldBridgeAdaptor(
+                        (ITwoWayStringBridge)instance);
+                else if (impl is IStringBridge)
+                    bridge = new String2FieldBridgeAdaptor((StringBridge)instance);
+                if (bridgeAnn.Parameters.Count > 0 && impl is IParameterizedBridge)
+                    ((IParameterizedBridge)instance).SetParameterValues(bridgeAnn.Parameters);
+            }
+            catch (Exception e)
+            {
+                throw new HibernateException("Unable to instaniate IFieldBridge for " + member.DeclaringType.FullName + "." + member.Name, e);
+            }
+            return bridge;
+        }
+
+
+        /// <summary>
+        /// Takes in a fieldBridge and will return you a TwoWayFieldBridge instance.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public static ITwoWayFieldBridge ExtractTwoWayType(System.Type type)
+        {
+            IFieldBridge fb = ExtractType(new FieldBridgeAttribute(type));
+            if (fb is ITwoWayFieldBridge)
+                return (ITwoWayFieldBridge) fb;
+            throw new SearchException("FieldBridge passed in is not an instance of ITwoWayFieldBridge");
+        }
+
         private static bool IsNullable(System.Type returnType)
         {
             return returnType.IsGenericType && typeof(Nullable<>) == returnType.GetGenericTypeDefinition();
@@ -151,7 +161,7 @@ namespace NHibernate.Search.Bridge
             if (prop != null)
                 return prop.PropertyType;
             else
-                return ((FieldInfo) member).FieldType;
+                return ((FieldInfo)member).FieldType;
         }
 
         public static IFieldBridge GetDateField(Resolution resolution)

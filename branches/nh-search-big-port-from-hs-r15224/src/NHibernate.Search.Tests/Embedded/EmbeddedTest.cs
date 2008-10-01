@@ -61,7 +61,7 @@ namespace NHibernate.Search.Tests.Embedded
             s.Persist(tower);
             tx.Commit();
 
-		    IFullTextSession session = Search.CreateFullTextSession( s );
+		    IFullTextSession session = Search.GetFullTextSession( s );
 		    QueryParser parser = new QueryParser( "id", new StandardAnalyzer() );
 
             Lucene.Net.Search.Query query = parser.Parse( "address.street:place" );
@@ -91,7 +91,7 @@ namespace NHibernate.Search.Tests.Embedded
 
 		    s.Clear();
 
-		    session = Search.CreateFullTextSession( s );
+		    session = Search.GetFullTextSession( s );
 
 		    query = parser.Parse( "address.ownedBy_name:buckhead" );
 		    result = session.CreateFullTextQuery( query ).List();
@@ -137,7 +137,7 @@ namespace NHibernate.Search.Tests.Embedded
 
 		    s.Clear();
 
-		    IFullTextSession session = Search.CreateFullTextSession( s );
+		    IFullTextSession session = Search.GetFullTextSession( s );
 		    QueryParser parser = new QueryParser( "id", new StandardAnalyzer() );
 
             Lucene.Net.Search.Query query = parser.Parse( "address.street:peachtree" );
@@ -157,7 +157,7 @@ namespace NHibernate.Search.Tests.Embedded
 
 		    s.Clear();
 
-		    session = Search.CreateFullTextSession( s );
+		    session = Search.GetFullTextSession( s );
 
 		    query = parser.Parse( "address.street:peachtree" );
 		    result = session.CreateFullTextQuery( query ).List();
@@ -216,7 +216,7 @@ namespace NHibernate.Search.Tests.Embedded
 
             s.Clear();
 
-		    IFullTextSession session = Search.CreateFullTextSession( s );
+		    IFullTextSession session = Search.GetFullTextSession( s );
 		    tx = session.BeginTransaction();
 
 		    QueryParser parser = new MultiFieldQueryParser( new string[] { "name", "authors.name" }, new StandardAnalyzer() );
@@ -242,7 +242,7 @@ namespace NHibernate.Search.Tests.Embedded
 		    s.Clear();
 
 		    tx = s.BeginTransaction();
-		    session = Search.CreateFullTextSession( s );
+		    session = Search.GetFullTextSession( s );
 		    query = parser.Parse( "Proust" );
 		    result = session.CreateFullTextQuery( query ).List();
 		    //HSEARCH-56

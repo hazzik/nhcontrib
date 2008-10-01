@@ -23,7 +23,13 @@ namespace NHibernate.Search.Store
         /// Executed after initialize, this method set up the heavy process of starting up the DirectoryProvider
         /// IO processing as well as backgroup processing are expected to be set up here
         /// </summary>
-        /// TODO stop() method, for now use finalize() 
         void Start();
+
+        /// <summary>
+        /// Executed when the search factory is closed. This method should stop any background process as well as
+        /// releasing any resource.
+        /// This method should avoid raising exceptions and log potential errors instead
+        /// </summary>
+        void Stop();
     }
 }

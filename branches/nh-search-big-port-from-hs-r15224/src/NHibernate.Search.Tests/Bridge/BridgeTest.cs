@@ -35,7 +35,7 @@ namespace NHibernate.Search.Tests.Bridge
             tx.Commit();
 
             tx = s.BeginTransaction();
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
             QueryParser parser = new QueryParser("id", new SimpleAnalyzer());
             Lucene.Net.Search.Query query;
             IList result;
@@ -74,7 +74,7 @@ namespace NHibernate.Search.Tests.Bridge
             tx.Commit();
 
             tx = s.BeginTransaction();
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
             QueryParser parser = new QueryParser("id", new StandardAnalyzer());
             Lucene.Net.Search.Query query;
             IList result;
@@ -119,7 +119,7 @@ namespace NHibernate.Search.Tests.Bridge
             tx.Commit();
 
             tx = s.BeginTransaction();
-            IFullTextSession session = Search.CreateFullTextSession(s);
+            IFullTextSession session = Search.GetFullTextSession(s);
             QueryParser parser = new QueryParser("id", new StandardAnalyzer());
             Lucene.Net.Search.Query query;
             IList result;

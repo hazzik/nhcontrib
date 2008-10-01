@@ -23,7 +23,9 @@ namespace NHibernate.Search.Filter
                 base.Impl = value;
                 // Add impl once and once only
                 if (implSet)
+                {
                     parameters[0] = value;
+                }
                 else
                 {
                     implSet = true;
@@ -42,9 +44,11 @@ namespace NHibernate.Search.Filter
         }
 
         /// <summary>
-        /// 
+        /// Serves as a hash function for a particular type.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"/>.
+        /// </returns>
         public override int GetHashCode()
         {
             int hash = 23;
@@ -55,17 +59,33 @@ namespace NHibernate.Search.Filter
         }
 
         /// <summary>
-        /// 
+        /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">The <see cref="T:System.Object"/> to compare with the current <see cref="T:System.Object"/>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>; otherwise, false.
+        /// </returns>
+        /// <exception cref="T:System.NullReferenceException">
+        /// The <paramref name="obj"/> parameter is null.
+        /// </exception>
         public override bool Equals(object obj)
         {
-            if (! (obj is StandardFilterKey)) return false;
-
-            StandardFilterKey that = (StandardFilterKey) obj;
-
-            throw new NotImplementedException("Must override Equals");
+            if (!(obj is StandardFilterKey))
+                return false;
+            StandardFilterKey that = (StandardFilterKey)obj;
+            int size = parameters.Count;
+            if (size != that.parameters.Count)
+                return false;
+            for (int index = 0; index < size; index++)
+            {
+                object paramThis = parameters[(index)];
+                object paramThat = that.parameters[(index)];
+                if (paramThis == null && paramThat != null)
+                    return false;
+                if (paramThis != null && !paramThis.Equals(paramThat))
+                    return false;
+            }
+            return true;
         }
 
         #endregion

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Lucene.Net.Index;
 using NHibernate.Search.Engine;
-using NHibernate.Search.Impl;
 using NHibernate.Search.Store;
 
 namespace NHibernate.Search.Reader

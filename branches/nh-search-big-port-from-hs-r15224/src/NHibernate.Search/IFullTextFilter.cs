@@ -7,6 +7,6 @@ namespace NHibernate.Search
     public interface IFullTextFilter
     {
         IFullTextFilter SetParameter(string name, object value);
-        object GetParameter(string name);
+        object GetParameter(string paramName);
     }
 }
