@@ -152,6 +152,11 @@
 				<exclude name="**/*.user" />
 				<exclude name="**/bin/**" />
 				<exclude name="**/obj/**" />
+				
+				<exclude name="**/log.txt*" />
+				<exclude name="**/*.resharper" />
+				<exclude name="**/result.txt" />
+				<exclude name="**/CodeStyle.xml" />
 			 
 			</fileset>
 		</copy></target>
