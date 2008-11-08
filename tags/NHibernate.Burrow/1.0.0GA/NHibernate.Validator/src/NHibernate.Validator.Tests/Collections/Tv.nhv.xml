@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nhv-mapping xmlns="urn:nhibernate-validator-1.0"
+			 namespace="NHibernate.Validator.Tests.Collections"
+			 assembly="NHibernate.Validator.Tests">
+	<class name="Tv">
+		<property name="name">
+			<not-null/>
+		</property>
+		<property name="presenters">
+			<valid/>
+		</property>
+		<property name="shows">
+			<valid/>
+		</property>
+		<property name="movies">
+			<valid/>
+		</property>
+		<property name="validatableInKey">
+			<valid/>
+		</property>
+		<property name="dontNeedDeepValidation">
+			<valid/>
+			<size max="1"/>
+		</property>
+	</class>
+</nhv-mapping>
