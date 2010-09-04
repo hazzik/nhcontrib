@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Don't touch this comment. If you are using Oxygen XML Editor uncomment this following line-->
+<!--DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5b1//EN" "../support/docbook-dtd/docbookx.dtd"-->
+<chapter id="validator-defineconstraints">
+  <title>Defining constraints</title>
+  <section id="validator-defineconstraints-definition" revision="1">
+    <title>What is a constraint?</title>
+    <para>A constraint is a rule that a given element (field, property or type) has to comply to.
+      The rule semantic is expressed by an Attribute or configured in Xml files. A constraint may
+      have some properties to configure the associated validator, for example a Min constraint will
+      have a value property setting the minimum acceptable value for the element to be valid.
+    </para>
+  </section>
+  <section id="validator-defineconstraints-builtin" revision="2">
+    <title>Built in constraints</title>
+    <para>Hibernate Validator comes with some built-in constraints, which cover most of the basic
+      data checks. As we'll see later, you're not limited to them, you can literally in a minute
+      write your own constraints.</para>
+    <table>
+      <title>Built-in constraints</title>
+      <tgroup cols="4">
+        <colspec align="center"/>
+        <thead>
+          <row>
+            <entry>Constraint</entry>
+            <entry>Apply on</entry>
+            <entry>Runtime checking</entry>
+            <entry>NHibernate Metadata impact</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>Length(Min=, Max=)</entry>
+            <entry>property (String)</entry>
+            <entry>checks if the string length is between the min-max range</entry>
+            <entry>Column length will be set to max</entry>
+          </row>
+          <row>
+            <entry>Max(Value=)</entry>
+            <entry>property (numeric or string representation of a numeric)</entry>
+            <entry>checks if the value is less than or equals to max</entry>
+            <entry>Add a check constraint on the column</entry>
+          </row>
+          <row>
+            <entry>Min(Value=)</entry>
+            <entry>property (numeric or string representation of a numeric)</entry>
+            <entry>checks if the value is more than or equals to min</entry>
+            <entry>Add a check constraint on the column</entry>
+          </row>
+          <row>
+            <entry>NotNull</entry>
+            <entry>property</entry>
+            <entry>checks if the value is not null</entry>
+            <entry>Column(s) are not null</entry>
+          </row>
+          <row>
+            <entry>NotEmpty</entry>
+            <entry>property</entry>
+            <entry>Checks if the string is not empty (a string filled with spaces is empty). </entry>
+            <entry>Column(s) are not null (for String)</entry>
+          </row>
+          <row>
+            <entry>NotEmptyOrNull</entry>
+            <entry>property</entry>
+            <entry>Check for a real emptiness concept (a string filled with spaces is not empty).</entry>
+            <entry>Column(s) are not null</entry>
+          </row>
+          <row>
+            <entry>Past</entry>
+            <entry>property (date or calendar)</entry>
+            <entry>check if the date is in the past</entry>
+            <entry>Add a check constraint on the column</entry>
+          </row>
+          <row>
+            <entry>Future</entry>
+            <entry>property (date or calendar)</entry>
+            <entry>check if the date is in the future</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>Pattern(Regex="regexp", Flag=) </entry>
+            <entry>property (string)</entry>
+            <entry>check if the property matches the regular expression given a match flag. The
+                <methodname>Flag</methodname> parameter is a
+                <classname>System.Text.RegularExpressions.RegexOptions</classname> enum. You can
+              also declare multiple Pattern attributes on the same member. </entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>Range(Min=, Max=)</entry>
+            <entry>property (numeric or string representation of a numeric)</entry>
+            <entry>check if the value is between Min and Max (included)</entry>
+            <entry>Add a check constraint on the column</entry>
+          </row>
+          <row>
+            <entry>Size(Min=, Max=)</entry>
+            <entry>property (array, collection, map)</entry>
+            <entry>check if the element size is between Min and Max (included)</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>AssertFalse</entry>
+            <entry>property</entry>
+            <entry>check that the method evaluates to false (useful for constraints expressed in
+              code rather than annotations)</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>AssertTrue</entry>
+            <entry>property</entry>
+            <entry>check that the method evaluates to true (useful for constraints expressed in code
+              rather than annotations)</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>Valid</entry>
+            <entry>property (object)</entry>
+            <entry>perform validation recursively on the associated object. If the object is a
+              Collection or an array, the elements are validated recursively. If the object is a
+              Map, the value elements are validated recursively.</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>Email</entry>
+            <entry>property (String)</entry>
+            <entry>check whether the string conforms to the email address specification</entry>
+            <entry>none</entry>
+          </row>
+          <row>
+            <entry>Digits</entry>
+            <entry>property (numeric or string representation of a numeric)</entry>
+            <entry>checks whether the property is a number having up to <literal
+              >integerDigits</literal> integer digits and <literal>fractionalDigits</literal>
+              fractonal digits</entry>
+            <entry>define column precision and scale</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+  </section>
+  <section id="validator-defineconstraints-error" xreflabel="Error messages">
+    <title>Error messages</title>
+    <para>NHibernate Validator comes with a default set of error messages translated in several
+      languages (if yours is not present, please send us a patch). You can add your own
+      additional set of messages while writing your validator Attributes or at XML. If NHibernate
+      Validator cannot resolve a key from your ResourceManager nor from ValidatorMessage, it falls
+      back to the default built-in values.</para>
+    <para>Alternatively you can provide a <classname>ResourceManager</classname> while checking
+      programmatically the validation rules on a bean or if you want a completly different
+      interpolation mechanism, you can provide an implementation of <literal
+        >NHibernate.Validator.Engine.IMessageInterpolator</literal>.</para>
+  </section>
+  <section id="validator-defineconstraints-own" revision="1">
+    <title>Writing your own constraints</title>
+    <para>Extending the set of  built-in constraints is extremely easy. Any constraint consists of
+      two pieces: the constraint <emphasis>descriptor</emphasis> (the attribute) and the constraint
+        <emphasis>validator</emphasis> (the implementation class). Here is a simple user-defined
+      descriptor:</para>
+    <programlisting>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+[ValidatorClass(typeof(PhoneValidator))]
+public class PhoneAttribute : Attribute, IRuleArgs
+{
+    private string message = string.Empty;
+    public string Message
+    {
+        get { return message; }
+        set { message = value; }
+    }
+}</programlisting>
+    <para>To link a descriptor to its validator implementation, we use the <literal
+      >[ValidatorClass]</literal> meta-attribute. Here you can see an implementation of a constraint
+      validator:</para>
+    <para>
+      <programlisting>
+public class PhoneValidator : IValidator
+{
+     public bool IsValid(object value)
+     {
+         Regex regex = new Regex(@"^[2-9]\d{2}-\d{3}-\d{4}$");
+         if (value == null) return true;
+         return regex.IsMatch(value.ToString());
+     }
+}
+</programlisting>
+    </para>
+    <para>This PhoneValidator class is simple. The method <literal>IsValid()</literal> receives a
+      string that should be validated with a Regex expression. The <literal>IsValid()</literal>
+      method should return false if the constraint has been violated. </para>
+    <para>If you need to initialize the class validator you can implement the interface <literal
+        >IInitializableValidator&lt;A></literal> and the class should look like this: </para>
+    <para>
+      <programlisting>
+public class PhoneValidator : IInitializableValidator&lt;PhoneAttribute>
+{
+    private Regex regex;
+
+    public bool IsValid(object value)
+    {
+        if (value == null) return true;
+        return regex.IsMatch(value.ToString());
+    }
+
+    public void Initialize(PhoneAttribute parameters)
+    {
+        regex = new Regex(@"^[2-9]\d{2}-\d{3}-\d{4}$");
+    }
+}</programlisting>
+    </para>
+    <para>As you can see, implementing the <literal>IInitializableValidator&lt;A></literal> interface
+      we have to implement the method <methodname>Initialize(...)</methodname> that initializes the
+      validator, and it's executed first of all.</para>
+    <para>The <literal>IsValid()</literal> method should return <literal>false</literal> if the
+      constraint has been violated. For more examples, refer to the built-in validator
+      implementations.</para>
+    <para>We now have to implement the validator (ie. the rule checking implementation). A
+      validation implementation can check the value of the a property (by implementing <literal
+        >PropertyConstraint</literal> ) and/or can modify the NHibernate mapping metadata to express
+      the constraint at the database level (by implementing <literal
+      >PersistentClassConstraint</literal> )</para>
+    <para>We have only seen property level validation, but you can write a class level validation
+      attribute. Instead of receiving the return instance of a property, the bean itself will be
+      passed to the validator. To activate the validation checking, just put the validation
+      attribute to the class itself instead of in a property. A small sample can be found in the
+      unit test suite.</para>
+    <para>If your constraint can be applied multiple times (with different parameters) on the same
+      property or type, you can use set the <literal>AllowMultiple</literal> parameter to <literal
+        >true</literal> on the <literal>AttributeUsage</literal> attribute. An example of this it's
+      the built-in validator Pattern, have a look:</para>
+    <programlisting>[Serializable]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+[ValidatorClass(typeof (PatternValidator))]
+public class PatternAttribute : Attribute, IRuleArgs
+{
+    ...
+</programlisting>
+  </section>
+  <section>
+    <title>Configuring your domain model with .Net Attributes</title>
+    <para>Since you are already familiar with attributes now, the syntax should be very familiar</para>
+    <programlisting>
+public class Address
+{ 
+    // a static non null field  
+    [NotNull]
+    public static string blacklistedZipCode;
+    
+    // field a not null string of 20 characters maximum
+    [Length(Max = 20), NotNull]    
+    private string country;
+    private long id;
+    private bool internalValid = true;
+    private string line1;
+    private string line2;
+    private string state;
+    private string zip;
+    
+    // a numeric between 1 and 2000
+    [Min(1), Range(Max = 2000)]
+    public long Id
+    {
+        get { return id; }
+        set { id = value; }
+    }
+
+    // respond to the constraint in the field: country
+    public string Country
+    {
+        get { return country; }
+        set { country = value; }
+    }
+
+    // a non null string
+    [NotNull]
+    public string Line1
+    {
+        get { return line1; }
+        set { line1 = value; }
+    }
+
+    // a not null string of 3 characters maximum
+    [Length(Max = 3), NotNull]
+    public string State
+    {
+        get { return state; }
+        set { state = value; }
+    }
+
+    // a not null numeric string of 5 characters maximum
+    // if the string is longer, the message will
+    // be searched in the resource bundle at key 'long'
+    [Length(Max = 5, Message = "{long}")]
+    [Pattern(Regex = "[0-9]+")]
+    [NotNull]
+    public string Zip
+    {
+        get { return zip; }
+        set { zip = value; }
+    }
+
+    // no constraint
+    public string Line2
+    {
+        get { return line2; }
+        set { line2 = value; }
+    }
+
+    // should always be true
+    [AssertTrue]
+    public bool InternalValid
+    {
+        get { return internalValid; }
+        set { internalValid = value; }
+    }
+} </programlisting>
+    <para>While the example only shows public property validation, you can also annotate fields of
+      any kind of visibility. In the example <classname>MyBeanConstraint</classname> is a custom
+      Class Validator, we will talk about this later.</para>
+    <programlisting>[MyBeanConstraint(Max=45)]
+public class Dog 
+{
+    [AssertTrue] private bool IsMale;
+    [NotNull] protected string Name { get {...} set{...} }
+    ...
+}        </programlisting>
+    <para>You can also annotate interfaces. NHibernate Validator will check all superclasses and
+      interfaces extended or implemented by a given type to read the appropriate validator
+      attributes.</para>
+    <programlisting>public interface Named 
+{
+    [NotNull] string Name {get; set;}
+    ...
+}
+
+public class Dog : Named 
+{
+    [AssertTrue] private bool isMale;
+    public string Name { get {...} set{...} }
+}
+        </programlisting>
+    <para>The name property will be checked for nullity when the Dog type is validated.</para>
+  </section>
+  <section>
+    <title>Configuring your domain model with XML</title>
+    <para>You also can configurate your domain model with constraints using xml files: the nhv.xml
+      files. We prefer to embed these Xml files into the assemblies, and NHibernate Validator is
+      prepared to inspect them and retrieve the resources with constrains, like NHibernate does
+      with hbm.xml files.</para>
+    <programlisting>
+&lt;?xml version="1.0" encoding="utf-8" ?>
+&lt;nhv-mapping xmlns="urn:nhibernate-validator-1.0"
+                        namespace="NHibernate.Validator.Tests.Base"
+                        assembly="NHibernate.Validator.Tests">
+    &lt;class name="Address">
+	&lt;property name="blacklistedZipCode">
+                  &lt;not-null/>
+	&lt;/property>
+	
+	&lt;property name="country">
+	       &lt;length max="20"/>
+	       &lt;not-null />	
+	&lt;/property>
+	
+	&lt;property name="floor">	
+	      &lt;range min="-2" max="50" message="{floor.out.of.range} (escaping #{el})" />
+	&lt;/property>
+	
+	&lt;property name="Id">	
+	      &lt;min value="1" />
+	      &lt;range max="2000" />
+	      &lt;max value="2500"/>
+	&lt;/property>
+	
+	&lt;property name="Line1" >	
+	      &lt;not-null/>
+	&lt;/property>
+	
+	&lt;property name="State">	
+	      &lt;not-null/>
+	      &lt;length max="3"/>
+	&lt;/property>
+
+	&lt;property name="Zip">
+	      &lt;length max="5" message="{long}"/>
+	      &lt;pattern regex="[0-9]+" />
+	      &lt;not-null/>
+	&lt;/property>
+	
+	&lt;property name="InternalValid">	
+	      &lt;asserttrue />
+	&lt;/property>
+    &lt;/class>
+&lt;/nhv-mapping>      
+</programlisting>
+    <para><emphasis role="bold">We strongly recommend</emphasis> to validate every nhv.xml file of
+      your application with the respective XSD file. Every nhv.xml file should be validated with the
+        <literal>nhv-mapping.xsd</literal> file included within the NHibernate Validator
+      distribution whether in source or binaries. Indeed, if you are using an IDE like Visual Studio it offers
+      IntelliSense support in the nhv.xml file if you add the schema to Visual Studio's xml schemas folder.</para>
+    <para><emphasis role="bold">Xml beauties:</emphasis> The nicest part of Xml for validation is
+      that you can put xml validators in a different dll so you don't need to recompile your domain
+      when validation rules change. Only the dll with the Xml files..</para>
+  </section>
+</chapter>
