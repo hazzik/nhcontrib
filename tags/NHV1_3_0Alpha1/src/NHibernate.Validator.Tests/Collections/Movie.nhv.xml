@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nhv-mapping xmlns="urn:nhibernate-validator-1.0"
+			 namespace="NHibernate.Validator.Tests.Collections"
+			 assembly="NHibernate.Validator.Tests">
+	<class name="Movie">
+		<property name="Name">
+			<not-null/>
+		</property>
+	</class>
+</nhv-mapping>

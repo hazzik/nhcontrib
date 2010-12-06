@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nhv-mapping xmlns="urn:nhibernate-validator-1.0" 
+			assembly="NHibernate.Validator.Tests" 
+			namespace="NHibernate.Validator.Tests.ConstraintFactory.Model"
+			>
+
+	<class name="Foo">
+		<attributename>MyAttribute</attributename>
+		<property name="CreditCard">
+			<creditcardnumber/>
+		</property>
+		
+		<property name="Description">
+			<rule attribute="MyAttribute"/>
+		</property>		
+	</class>
+</nhv-mapping>
